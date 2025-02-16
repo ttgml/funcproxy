@@ -3,21 +3,24 @@ import logging
 from threading import Lock
 from flask import Flask, request, Response, render_template, stream_with_context, jsonify
 from flask_cors import CORS
+import json
+import os
+import pkg_resources
 from gevent.pywsgi import WSGIServer
 
-from .plugin import PluginManager  # 假设 PluginManager 在 plugin.py 中已实现
-
+from .plugin import PluginManager
 from .lib import generate_stream_response, generate_fake_response
-
 from .lib import extensions
+from .lib import load_config, save_config
 
 
 logger = logging.getLogger("funcproxy")
 logger.addHandler(logging.StreamHandler())
 
+CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), 'config.json')
+
 def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = False):
     """启动带插件系统的 HTTP 服务器
-    
     Args:
         port: 监听端口
         plugin_dir: 插件目录路径
@@ -35,11 +38,14 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
     except Exception as e:
         logger.error(f"Initial plugin loading failed: {str(e)}")
 
-    #添加静态资源目录
-    app.static_folder = "static"
+    # 设置模板目录
+    template_folder = pkg_resources.resource_filename(__name__, 'templates')
+    app.template_folder = template_folder
 
-    #设置html模板目录
-    app.template_folder = "templates"
+    # 设置静态资源目录
+    static_folder = pkg_resources.resource_filename(__name__, 'static')
+    print(static_folder)
+    app.static_folder = static_folder
     @app.route('/')
     def extension_home():
         return render_template("extensions.html")
@@ -78,11 +84,7 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
 
     @app.route('/api/settings', methods=['GET','POST'])
     def api_settings():
-        app_settings = {
-            "apiDomain": "https://api.default.com",
-            "apiKey": "",
-            "modelName": "gpt-3.5"
-        }
+        app_settings = load_config(CONFIG_FILE_PATH)
         if request.method == 'GET':
             return jsonify(app_settings)
         if request.method == 'POST':
@@ -92,16 +94,16 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
                 "apiKey": data.get('apiKey', app_settings['apiKey']),
                 "modelName": data.get('modelName', app_settings['modelName'])
             })
+            save_config(app_settings, CONFIG_FILE_PATH)
             return jsonify({"status": "success"})
     @app.route('/v1/chat/completions', methods=['POST'])
     def chat_completions():
         data = request.get_json()
         model = data.get("model", "")
         stream = data.get("stream", False)
+        print(json.dumps(data))
         if stream:
-            print(f"Streaming response for model {model}")
             return stream_with_context(generate_stream_response(model))
-        
         return jsonify(generate_fake_response(model))
 
     # 配置请求处理管道

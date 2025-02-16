@@ -23,3 +23,12 @@ funcproxy = "funcproxy.cli:main"
 [project.urls]
 Homepage = "https://github.com/ttgml/funcproxy"
 Issues = "https://github.com/ttgml/funcproxy/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"funcproxy.core" = ["templates/*.html", "static/*"]

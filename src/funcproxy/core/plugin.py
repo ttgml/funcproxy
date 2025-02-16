@@ -41,9 +41,9 @@ class PluginManager:
                 return False
                 
             hook_class = module.Hook
-            if not issubclass(hook_class, BaseHook):
-                logger.error(f"Plugin {path} Hook must inherit from BaseHook")
-                return False
+            # if not issubclass(hook_class, BaseHook):
+            #     logger.error(f"Plugin {path} Hook must inherit from BaseHook")
+            #     return False
                 
             instance = hook_class()
             

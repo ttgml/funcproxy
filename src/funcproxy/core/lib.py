@@ -2,6 +2,7 @@ import time
 import uuid
 import json
 import logging
+import os
 
 def generate_fake_response(model):
     """生成模拟的OpenAI响应结构"""
@@ -42,9 +43,27 @@ def generate_stream_response(model, delay=0.2):
             }]
         }
         yield f"data: {json.dumps(data)}\n\n"
-        print(f"Sent chunk {index + 1}: {chunk}")
         time.sleep(delay)
     yield "data: [DONE]\n\n"
+
+
+def load_config(CONFIG_FILE_PATH):
+    """从配置文件中加载设置"""
+    print(f"Loading config from {CONFIG_FILE_PATH}")
+    if os.path.exists(CONFIG_FILE_PATH):
+        with open(CONFIG_FILE_PATH, 'r') as f:
+            return json.load(f)
+    else:
+        return {
+            "apiDomain": "https://api.default.com",
+            "apiKey": "",
+            "modelName": ""
+        }
+
+def save_config(config, CONFIG_FILE_PATH):
+    """将设置保存到配置文件中"""
+    with open(CONFIG_FILE_PATH, 'w') as f:
+        json.dump(config, f, indent=4)
 
 
 extensions = [

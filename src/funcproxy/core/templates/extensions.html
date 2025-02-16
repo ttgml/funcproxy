@@ -193,31 +193,38 @@
         .settings-btn:hover {
             background-color: rgba(26, 115, 232, 0.08);
         }
+
+        .page-container {
+            max-width: 900px;
+            margin: 20px auto;
+        }
     </style>
 </head>
 
 <body>
-    <div class="toolbar">
-        <input type="text" class="search-box" placeholder="搜索扩展程序">
-        <label class="dev-mode">
-            <input type="checkbox"> 开发者模式
-        </label>
-        <div class="toolbar-right">
-            <a href="settings.html" class="settings-btn">设置</a>
+    <div class="page-container">
+        <div class="toolbar">
+            <input type="text" class="search-box" placeholder="搜索扩展程序">
+            <label class="dev-mode">
+                <input type="checkbox"> 开发者模式
+            </label>
+            <div class="toolbar-right">
+                <a href="settings.html" class="settings-btn">设置</a>
+            </div>
         </div>
-    </div>
 
-    <div class="extension-list" id="extensionList">
-        <!-- 数据将通过JS动态加载 -->
-    </div>
+        <div class="extension-list" id="extensionList">
+            <!-- 数据将通过JS动态加载 -->
+        </div>
 
-    <div class="add-extension">
-        <a href="#" class="get-extensions">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#1a73e8">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-            </svg>
-            获取更多扩展
-        </a>
+        <div class="add-extension">
+            <a href="#" class="get-extensions">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#1a73e8">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+                获取更多扩展
+            </a>
+        </div>
     </div>
 </body>
 <script>
