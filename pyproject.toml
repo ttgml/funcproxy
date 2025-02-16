@@ -1,0 +1,25 @@
+[project]
+name = "funcproxy"
+version = "0.0.1"
+authors = [
+  { name="hy", email="ttgml@outlook.com" },
+]
+description = "funcproxy is a tool for function proxy"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "flask==3.1.0",
+  "click==8.1.8",
+]
+
+[project.scripts]
+funcproxy = "funcproxy.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ttgml/funcproxy"
+Issues = "https://github.com/ttgml/funcproxy/issues"

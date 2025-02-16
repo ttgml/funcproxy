@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>扩展详情</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 共用样式 */
+        /* ...保持与管理页面相同的样式... */
+
+        /* 详情页专用样式 */
+        .detail-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .detail-icon {
+            width: 128px;
+            height: 128px;
+            margin-right: 30px;
+        }
+
+        .detail-title {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .detail-meta {
+            color: #5f6368;
+            margin-bottom: 15px;
+        }
+
+        .back-link {
+            color: #1a73e8;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .detail-actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="detail-container">
+        <a href="{{ url_for('extension_home') }}" class="back-link">← 返回扩展管理</a>
+
+        <div class="detail-header">
+            <img id="detailIcon" src="" class="detail-icon" alt="扩展图标">
+            <div>
+                <h1 id="detailTitle" class="detail-title"></h1>
+                <div id="detailDesc" class="detail-meta"></div>
+                <div class="detail-meta">
+                    版本：<span id="detailVersion"></span> •
+                    大小：<span id="detailSize"></span> •
+                    最后更新：<span id="detailUpdated"></span>
+                </div>
+                <div id="authorSection" style="display: none;">
+                    开发者：<span id="detailAuthor"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-actions">
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleEnable">
+                <span class="toggle-slider"></span>
+            </label>
+            <button class="remove-button">移除扩展</button>
+        </div>
+    </div>
+
+    <script>
+        // 模拟API配置
+        const API = {
+            getExtensionDetail: (id) => $.ajax({
+                url: `/api/extensions/${id}`,
+                method: 'GET',
+                dataType: 'json'
+            })
+        };
+        
+        // 页面初始化
+        $(document).ready(function() {
+            const params = new URLSearchParams(location.search);
+            const extId = params.get('id');
+        
+            API.getExtensionDetail(extId)
+                .done(function(extData) {
+                    $('#detailIcon').attr('src', extData.icon);
+                    $('#detailTitle').text(extData.title);
+                    $('#detailDesc').text(extData.description);
+                    $('#detailVersion').text(extData.version);
+                    $('#detailSize').text(extData.size);
+                    $('#detailUpdated').text(new Date(extData.updated).toLocaleDateString());
+                    $('#toggleEnable').prop('checked', extData.enabled);
+        
+                    if(extData.author) {
+                        $('#detailAuthor').text(extData.author);
+                        $('#authorSection').show();
+                    }
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    alert('扩展详情加载失败');
+                    window.history.back();
+                });
+        });
+        </script>
+</body>
+
+</html>

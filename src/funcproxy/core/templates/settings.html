@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>设置</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 共用样式 */
+        body {
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .settings-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
+        }
+
+        .back-link {
+            color: #1a73e8;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .setting-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .setting-title {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .setting-description {
+            color: #5f6368;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 95%;
+            padding: 8px 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+
+        .form-description {
+            color: #5f6368;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .save-button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .save-button:hover {
+            background: #1557b0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="settings-container">
+        <a href="{{url_for('extension_home')}}" class="back-link">← 返回扩展管理</a>
+
+        <h1>设置</h1>
+        <div class="setting-item">
+            <div class="setting-title">API 配置</div>
+
+            <div class="form-group">
+                <label>API 域名</label>
+                <input type="text" id="apiDomain" class="form-input" placeholder="https://api.example.com">
+                <div class="form-description">输入您的API服务地址</div>
+            </div>
+
+            <div class="form-group">
+                <label>API 密钥</label>
+                <input type="password" id="apiKey" class="form-input" placeholder="••••••••••••">
+                <div class="form-description">用于身份验证的密钥</div>
+            </div>
+
+            <div class="form-group">
+                <label>模型名称</label>
+                <input type="text" id="modelName" class="form-input" placeholder="gpt-4">
+                <div class="form-description">选择使用的模型版本</div>
+            </div>
+
+            <button class="save-button" onclick="saveSettings()">保存配置</button>
+        </div>
+    </div>
+
+    <script>
+        // 获取设置数据
+        function loadSettings() {
+            $.ajax({
+                url: `/api/settings`,
+                method: 'GET'
+            })
+                .done(data => {
+                    $('#apiDomain').val(data.apiDomain);
+                    $('#apiKey').val(data.apiKey);
+                    $('#modelName').val(data.modelName);
+                })
+                .fail(() => alert('获取配置失败'));
+        }
+
+        // 保存设置
+        function saveSettings() {
+            const payload = {
+                apiDomain: $('#apiDomain').val(),
+                apiKey: $('#apiKey').val(),
+                modelName: $('#modelName').val()
+            };
+
+            $('.save-button').prop('disabled', true).text('保存中...');
+
+            $.ajax({
+                url: `/api/settings`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload)
+            })
+                .done(() => alert('配置保存成功'))
+                .fail(() => alert('保存失败'))
+                .always(() => {
+                    $('.save-button').prop('disabled', false).text('保存配置');
+                });
+        }
+
+        // 页面加载时获取配置
+        $(document).ready(loadSettings);
+    </script>
+</body>
+
+</html>
