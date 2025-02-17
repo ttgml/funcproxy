@@ -9,15 +9,13 @@ import pkg_resources
 from gevent.pywsgi import WSGIServer
 
 from .plugin import PluginManager
-from .lib import generate_stream_response, generate_fake_response
+from .lib import proxy_stream_request, generate_fake_response
 from .lib import extensions
 from .lib import load_config, save_config
 
 
 logger = logging.getLogger("funcproxy")
 logger.addHandler(logging.StreamHandler())
-
-CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), 'config.json')
 
 def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = False):
     """启动带插件系统的 HTTP 服务器
@@ -84,7 +82,7 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
 
     @app.route('/api/settings', methods=['GET','POST'])
     def api_settings():
-        app_settings = load_config(CONFIG_FILE_PATH)
+        app_settings = load_config()
         if request.method == 'GET':
             return jsonify(app_settings)
         if request.method == 'POST':
@@ -94,17 +92,17 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
                 "apiKey": data.get('apiKey', app_settings['apiKey']),
                 "modelName": data.get('modelName', app_settings['modelName'])
             })
-            save_config(app_settings, CONFIG_FILE_PATH)
+            save_config(app_settings)
             return jsonify({"status": "success"})
     @app.route('/v1/chat/completions', methods=['POST'])
     def chat_completions():
         data = request.get_json()
-        model = data.get("model", "")
         stream = data.get("stream", False)
-        print(json.dumps(data))
+        # print(json.dumps(data))
+        # print(request.headers)
         if stream:
-            return stream_with_context(generate_stream_response(model))
-        return jsonify(generate_fake_response(model))
+            return stream_with_context(proxy_stream_request(request))
+        return jsonify(generate_fake_response("model"))
 
     # 配置请求处理管道
     @app.before_request
