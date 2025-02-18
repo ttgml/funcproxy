@@ -48,6 +48,24 @@ def generate_stream_response(model, delay=0.2):
         time.sleep(delay)
     yield "data: [DONE]\n\n"
 
+def generate_stream_data(id: str, model:str, content: str, finish_reason: str):
+    fake_response_data = {
+        "id": id,
+        "object": "chat.completion.chunk",
+        "created": int(time.time()),
+        "model": model,
+        "choices": [{
+            "index": 0,
+            "delta": {
+                "content": content,
+                "role": "assistant"
+            },
+            "finish_reason": None
+        }]
+    }
+    fake_response_data = json.dumps(fake_response_data)
+    return fake_response_data
+
 def proxy_stream_request(request: Request):
     data = request.get_json()
     proxy_config = load_config()
@@ -69,7 +87,14 @@ def proxy_stream_request(request: Request):
                     }
                 }
             }
-        }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_current_location",
+                "description": "Get the current location"
+            }
+        },
     ]
 
     data['model'] = proxy_config['modelName']
@@ -79,50 +104,59 @@ def proxy_stream_request(request: Request):
         "Authorization": f"Bearer {proxy_config['apiKey']}"
     }
     url = f"{proxy_config['apiDomain']}/v1/chat/completions"
-    response = requests.post(url, json=data, headers=headers, stream=True)
 
-    current_tool_call = {
-        "id": None,          # 当前工具调用的唯一ID
-        "function": {
-            "name": "",      # 逐步累积的函数名
-            "arguments": ""  # 逐步累积的参数JSON字符串
-        }
-    }
-    
-    try:
-        for chunk in response.iter_lines():
-            if chunk:
-                chunk_str = chunk.decode('utf-8')
-                if chunk_str.startswith('data: '):
-                    json_str = chunk_str[len('data: '):]
-                    if json_str.strip() == "[DONE]":
-                        break
-                    try:
-                        json_obj = json.loads(json_str)
-                        choice = json_obj.get('choices', [{}])[0]
-                        delta = choice.get('delta', {})
-                        if "content" in delta:
-                            print(chunk_str)
-                            yield chunk_str + "\n\n"
-                        if "tool_calls" in delta :
-                            tool_calls = delta["tool_calls"][0]
-                            if "function" in tool_calls and "name" in tool_calls["function"]:
-                                current_tool_call["function"]["name"] += tool_calls["function"]["name"]
-                            if "function" in tool_calls and "arguments" in tool_calls["function"]:
-                                current_tool_call["function"]["arguments"] += tool_calls["function"]["arguments"]
-                            if "id" in tool_calls:
-                                current_tool_call["id"] = tool_calls["id"]
-                        content = json_obj['choices'][0]['delta'].get('content', '')
-                        # print("Content: ",content)
-                    except json.JSONDecodeError:
-                        print(f"Invalid JSON: {chunk_str}")
-                else:
-                    print(f"Unexpected chunk: {chunk_str}")
-        print(current_tool_call)
-    except Exception as e:
-        print(f"Error: ", e)
-    finally:
-        response.close()
+    process_session = True
+    while process_session:
+        response = requests.post(url, json=data, headers=headers, stream=True)
+        final_tool_calls = {}
+        try:
+            for chunk in response.iter_lines():
+                if chunk:
+                    chunk_str = chunk.decode('utf-8')
+                    if chunk_str.startswith('data: '):
+                        json_str = chunk_str[len('data: '):]
+                        if json_str.strip() == "[DONE]":
+                            if final_tool_calls == {}:
+                                process_session = False
+                            else:
+                                yield "data: " + str(generate_stream_data("chatcmpl-" + str(uuid.uuid4()), data['model'], str(final_tool_calls), 'stop')) + "\n\n"
+                                yield "[DONE]"
+                                for i in final_tool_calls.keys():
+                                    print(f"{i}: {final_tool_calls[i]['id']}")
+                                    data['messages'].append({"role": "tool", "content": "23摄氏度", "tool_call_id": final_tool_calls[i]['id']})
+                                    print(data)
+                                process_session = True
+                            break
+                        else:
+                            try:
+                                json_obj = json.loads(json_str)
+                                choice = json_obj.get('choices', [{}])[0]
+                                delta = choice.get('delta', {})
+                                if "content" in delta:
+                                    if delta["content"] != None:
+                                        yield chunk_str + "\n\n"
+                                if "tool_calls" in delta :
+                                    for tool_call in delta["tool_calls"]:
+                                        index = tool_call['index']
+                                        if index not in final_tool_calls:
+                                            final_tool_calls[index] = tool_call
+                                            # print("tool_call: ", tool_call)
+                                        else:
+                                            if "name" in tool_call['function']:
+                                                if tool_call['function']['name'] != None:
+                                                    final_tool_calls[index]['function']['name'] += tool_call['function']['name']
+                                            if "arguments" in tool_call['function']:
+                                                if tool_call['function']['arguments'] != None:
+                                                    final_tool_calls[index]['function']['arguments'] += tool_call['function']['arguments']
+                            except json.JSONDecodeError:
+                                print(f"Invalid JSON: {chunk_str}")
+                    else:
+                        print(f"Unexpected chunk: {chunk_str}")
+        except Exception as e:
+            print(f"Error: ", e)
+        finally:
+            response.close()
+    print("process end")
 
 
 def load_config():
