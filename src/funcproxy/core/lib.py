@@ -141,10 +141,7 @@ def proxy_stream_request(request: Request):
                             if final_tool_calls == {}:
                                 process_session = False
                             else:
-                                # yield "data: " + str(generate_stream_data("chatcmpl-" + str(uuid.uuid4()), data['model'], str(final_tool_calls), 'stop')) + "\n\n"
-                                # yield "[DONE]"
                                 for i in final_tool_calls.keys():
-                                    # print(f"{i}: {final_tool_calls[i]['id']}")
                                     data['messages'].append(generate_function_message(final_tool_calls[i]))
                                     result = ""
                                     if final_tool_calls[i]['function']['name'] == "get_current_weather":
@@ -155,7 +152,6 @@ def proxy_stream_request(request: Request):
                                         result = "2000 Dollars"
                                     print("result: ", result)
                                     data['messages'].append({"role": "tool", "content": result, "tool_call_id": final_tool_calls[i]['id']})
-                                    # print(data)
                                 process_session = True
                             break
                         else:
@@ -183,6 +179,8 @@ def proxy_stream_request(request: Request):
                                 print(f"Invalid JSON: {chunk_str}")
                     else:
                         print(f"Unexpected chunk: {chunk_str}")
+                        process_session = False
+                        break
         except Exception as e:
             print(f"Error: ", e)
         finally:
@@ -213,22 +211,32 @@ def save_config(config):
 
 extensions = [
             {
-                "id": "adblock",
-                "icon": "https://via.placeholder.com/48",
-                "title": "AdBlock - 最佳广告拦截工具",
-                "description": "拦截网页上的广告和弹窗，提升浏览体验",
+                "id": "notepad",
+                "icon": "/icon?id=notepad",
+                "title": "Notepad - 让AI记住一些事情",
+                "description": "AI可以在适当的时候记录一些事情",
                 "version": "5.15.0",
                 "size": "3.2MB",
                 "updated": "2024-02-15",
                 "enabled": True
             },
             {
-                "id": "grammarly",
-                "icon": "https://via.placeholder.com/48",
-                "title": "Grammarly for Chrome",
-                "description": "实时语法检查和写作建议",
+                "id": "runenv",
+                "icon": "/icon?id=runenv",
+                "title": "runenv - 获取当前的环境信息",
+                "description": "在执行程序之前，我觉得它应该需要知道一些事情",
                 "version": "1.45.2",
                 "size": "15.8MB",
+                "updated": "2024-02-10",
+                "enabled": False
+            },
+            {
+                "id": "smtplib",
+                "icon": "/icon?id=smtplib",
+                "title": "SMTP Client",
+                "description": "可以用来发送邮件",
+                "version": "1.0.0",
+                "size": "1.2MB",
                 "updated": "2024-02-10",
                 "enabled": False
             }

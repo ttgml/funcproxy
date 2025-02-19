@@ -1,11 +1,13 @@
 # src/hook_tool/core/server.py
 import logging
 from threading import Lock
-from flask import Flask, request, Response, render_template, stream_with_context, jsonify
+from flask import Flask, request, Response, send_file
+from flask import render_template, stream_with_context, jsonify
 from flask_cors import CORS
 import json
 import os
 import pkg_resources
+from pathlib import Path
 from gevent.pywsgi import WSGIServer
 
 from .plugin import PluginManager
@@ -31,8 +33,8 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
 
     # 初始化插件系统
     try:
-        plugin_manager.load_plugins_from_dir(plugin_dir)
-        logger.info(f"Loaded {len(plugin_manager.hooks)} plugins from {plugin_dir}")
+        plugin_manager.load_plugins_from_dir()
+        logger.info(f"Loaded plugins from {plugin_dir}")
     except Exception as e:
         logger.error(f"Initial plugin loading failed: {str(e)}")
 
@@ -42,12 +44,23 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
 
     # 设置静态资源目录
     static_folder = pkg_resources.resource_filename(__name__, 'static')
-    print(static_folder)
     app.static_folder = static_folder
     @app.route('/')
     def extension_home():
         return render_template("extensions.html")
     
+    @app.route('/icon')
+    def get_icon_img():
+        if request.method == 'GET':
+            plugin_path = Path(__file__).parent.parent / "plugins"
+            print(plugin_path)
+            plugin_id = request.args.get('id','404')
+            icon_path = os.path.join( plugin_path , plugin_id , "icon.png")
+            if os.path.exists(icon_path):
+                return send_file(icon_path)
+            return jsonify({"error": "icon not found"}),404
+            
+
     @app.route('/extension-detail.html')
     def extension_detail():
         return render_template("extension-detail.html")
