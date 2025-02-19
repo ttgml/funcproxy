@@ -66,6 +66,21 @@ def generate_stream_data(id: str, model:str, content: str, finish_reason: str):
     fake_response_data = json.dumps(fake_response_data)
     return fake_response_data
 
+def generate_function_message(tool_call: dict):
+    obj = {
+        "role": "assistant",
+        "content": None,
+        "tool_calls": [{
+            "id": tool_call["id"],
+            "type": "function",
+            "function": {
+                "name": tool_call["function"]["name"],
+                "arguments": tool_call["function"]["arguments"]
+            }
+        }]
+    }
+    return obj
+
 def proxy_stream_request(request: Request):
     data = request.get_json()
     proxy_config = load_config()
@@ -95,6 +110,13 @@ def proxy_stream_request(request: Request):
                 "description": "Get the current location"
             }
         },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_wallet_balance",
+                "description": "Get the wallet balance."
+            }
+        },
     ]
 
     data['model'] = proxy_config['modelName']
@@ -119,12 +141,21 @@ def proxy_stream_request(request: Request):
                             if final_tool_calls == {}:
                                 process_session = False
                             else:
-                                yield "data: " + str(generate_stream_data("chatcmpl-" + str(uuid.uuid4()), data['model'], str(final_tool_calls), 'stop')) + "\n\n"
-                                yield "[DONE]"
+                                # yield "data: " + str(generate_stream_data("chatcmpl-" + str(uuid.uuid4()), data['model'], str(final_tool_calls), 'stop')) + "\n\n"
+                                # yield "[DONE]"
                                 for i in final_tool_calls.keys():
-                                    print(f"{i}: {final_tool_calls[i]['id']}")
-                                    data['messages'].append({"role": "tool", "content": "23摄氏度", "tool_call_id": final_tool_calls[i]['id']})
-                                    print(data)
+                                    # print(f"{i}: {final_tool_calls[i]['id']}")
+                                    data['messages'].append(generate_function_message(final_tool_calls[i]))
+                                    result = ""
+                                    if final_tool_calls[i]['function']['name'] == "get_current_weather":
+                                        result = "23 °C"
+                                    if final_tool_calls[i]['function']['name'] == "get_current_location":
+                                        result = "北京"
+                                    if final_tool_calls[i]['function']['name'] == "get_wallet_balance":
+                                        result = "2000 Dollars"
+                                    print("result: ", result)
+                                    data['messages'].append({"role": "tool", "content": result, "tool_call_id": final_tool_calls[i]['id']})
+                                    # print(data)
                                 process_session = True
                             break
                         else:
