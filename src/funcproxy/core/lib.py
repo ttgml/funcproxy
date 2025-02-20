@@ -81,46 +81,55 @@ def generate_function_message(tool_call: dict):
     }
     return obj
 
+def get_plugin_manager():
+    return current_app.plugin_manager
 def proxy_stream_request(request: Request):
     data = request.get_json()
     proxy_config = load_config()
     # print(proxy_config)
 
-    tools = [
-        {
-            "type": "function",
-            "function": {
-                "name": "get_current_weather",
-                "description": "Get the current weather in a given location",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "location": {
-                            "type": "string",
-                            "description": "The city and state, e.g. San Francisco, CA",
-                        }
-                    }
-                }
-            }
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_current_location",
-                "description": "Get the current location"
-            }
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_wallet_balance",
-                "description": "Get the wallet balance."
-            }
-        },
-    ]
+    # tools = [
+    #     {
+    #         "type": "function",
+    #         "function": {
+    #             "name": "get_current_weather",
+    #             "description": "Get the current weather in a given location",
+    #             "parameters": {
+    #                 "type": "object",
+    #                 "properties": {
+    #                     "location": {
+    #                         "type": "string",
+    #                         "description": "The city and state, e.g. San Francisco, CA",
+    #                     }
+    #                 }
+    #             }
+    #         }
+    #     },
+    #     {
+    #         "type": "function",
+    #         "function": {
+    #             "name": "get_current_location",
+    #             "description": "Get the current location"
+    #         }
+    #     },
+    #     {
+    #         "type": "function",
+    #         "function": {
+    #             "name": "get_wallet_balance",
+    #             "description": "Get the wallet balance."
+    #         }
+    #     },
+    # ]
 
+    plugin_manager = get_plugin_manager()
+    tools = []
+    for tool_name, plugin_name in plugin_manager.tools.items():
+        print("tools name: ", tools, plugin_name)
+        tools = plugin_manager.enabled_plugins[plugin_name].add_function(tools)
+    print("tools result: ", tools)
     data['model'] = proxy_config['modelName']
-    data["tools"] = tools
+    if len(tools) > 0:
+        data["tools"] = tools
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {proxy_config['apiKey']}"

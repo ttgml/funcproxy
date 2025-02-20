@@ -143,8 +143,7 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
         @app.route('/_hook_tool/status')
         def status():
             return {
-                "status": "running",
-                "plugins": [type(h).__name__ for h in plugin_manager.hooks]
+                "status": "running"
             }
 
     try:

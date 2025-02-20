@@ -75,6 +75,9 @@ class PluginManager:
             if isinstance(cls, type) and issubclass(cls, PluginBase) and cls is not PluginBase:
                 self.enabled_plugins[module_name] = cls()
                 print(f"add done.")
+                for tool in self.get_plugin_tools(module_name):
+                    self.tools[tool['func']] = module_name
+                    print("add func: ", tool['func'])
                 return True
         return False
     def _unload_plugin(self, plugin_id: str):
@@ -83,6 +86,14 @@ class PluginManager:
         self.enabled_plugins.pop(plugin_id, None)
         print(f"remove done.")
         print(self.enabled_plugins)
+
+    def get_plugin_tools(self, plugin_id: str) -> list:
+        """获取指定插件的函数列表"""
+        plugin_info = self.get_plugin_info(plugin_id)
+        if plugin_info:
+            tools = plugin_info['info'].get('func', [])
+            return tools
+        return []
 
     def get_plugin_info(self, plugin_id: str) -> dict:
         result = {}
@@ -97,6 +108,7 @@ class PluginManager:
         else:
             raise FileNotFoundError(f"插件 {plugin_id} 的信息文件不存在")
         return result
+    
     
     def save_plugin_info(self, plugin_id: str, info: dict) -> dict:
         plugin_path = os.path.join(self.plugins_path, plugin_id)

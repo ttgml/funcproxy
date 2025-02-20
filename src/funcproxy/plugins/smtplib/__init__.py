@@ -3,6 +3,7 @@ from funcproxy.core.plugin_base import PluginBase
 class Plugin(PluginBase):
     def __init__(self):
         print("SMTP Plugin initialized")
+        self.plugin_id = "smtplib"
         self.install()
     
     def function_call(self, parameters: dict) -> dict:
@@ -12,35 +13,14 @@ class Plugin(PluginBase):
         }
         print("smtplib call: ", parameters)
         return result
-
-    def add_function(self, tools: list) -> list:
-        fc = {
-            "type": "function",
-            "function": {
-                "name": "send_email",
-                "description": "Send an email using SMTP",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "to": {
-                            "type": "string",
-                            "description": "The email address of the recipient"
-                        },
-                        "subject": {
-                            "type": "string",
-                            "description": "The subject of the email"
-                        },
-                        "body": {
-                            "type": "string",
-                            "description": "The body of the email"
-                        }
-                    },
-                    "required": ["to", "subject", "body"]
-                }
-            }
+    
+    def do_send_mail(self, parameters: dict) -> dict:
+        result = {
+            "status": "success",
+            "message": "SMTP Plugin called successfully"
         }
-        tools.append(fc)
-        return tools
+        print("smtplib call: ", parameters)
+        return result
     
     def install(self) -> dict:
         return {
