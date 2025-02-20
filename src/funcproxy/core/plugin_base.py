@@ -1,12 +1,9 @@
 
 
 class PluginBase:
-    def name(self) -> str:
-        """
-        The name of the plugin.
-        """
-        raise NotImplementedError("PluginBase.name is not implemented")
-    
+
+    def __init__(self):
+        raise NotImplementedError("PluginBase is not implemented")
 
     def id(self) -> str:
         """
@@ -25,26 +22,13 @@ class PluginBase:
         Add a function to the plugin.
         """
         raise NotImplementedError("PluginBase.add_function is not implemented")
-    
-    def install(self, config: dict) -> dict:
-        """
-        Install the plugin.
-        """
-        raise NotImplementedError("PluginBase.install is not implemented")
-    
-    def uninstall(self, config: dict) -> dict:
-        """
-        Uninstall the plugin.
-        """
-        raise NotImplementedError("PluginBase.uninstall is not implemented")
-    
-    def enable(self, config: dict) -> dict:
+    def enable(self) -> dict:
         """
         Enable the plugin.
         """
         raise NotImplementedError("PluginBase.enable is not implemented")
     
-    def disable(self, config: dict) -> dict:
+    def disable(self) -> dict:
         """
         Disable the plugin.
         """

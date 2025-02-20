@@ -12,11 +12,12 @@ from gevent.pywsgi import WSGIServer
 
 from .plugin import PluginManager
 from .lib import proxy_stream_request, generate_fake_response
-from .lib import extensions
+
 from .lib import load_config, save_config
 
 
 logger = logging.getLogger("funcproxy")
+logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = False):
@@ -30,11 +31,11 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
     CORS(app)
     plugin_manager = PluginManager()
     reload_lock = Lock()  # 插件重载的线程锁
+    app.plugin_manager = plugin_manager
 
     # 初始化插件系统
     try:
         plugin_manager.load_plugins_from_dir()
-        logger.info(f"Loaded plugins from {plugin_dir}")
     except Exception as e:
         logger.error(f"Initial plugin loading failed: {str(e)}")
 
@@ -71,10 +72,12 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
     
     @app.route('/api/extensions')
     def get_extensions():
+        extensions = plugin_manager.get_plugins()
         return jsonify(extensions)
     
     @app.route('/api/extensions/<string:ext_id>', methods=['GET', 'DELETE', 'PATCH'])
     def get_extension(ext_id):
+        extensions = plugin_manager.get_plugins()
         ext = next((e for e in extensions if e["id"] == ext_id), None)
         if not ext:
                 return jsonify({"error": "Extension not found"}), 404
@@ -91,6 +94,10 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
             return jsonify({"success": True})
         if request.method == 'PATCH':
             ext['enabled'] = not ext['enabled']
+            if ext['enabled'] == True:
+                plugin_manager.enable_plugin(ext['id'])
+            else:
+                plugin_manager.disable_plugin(ext['id'])
             return jsonify({"success": True, "newStatus": ext['enabled']})
 
     @app.route('/api/settings', methods=['GET','POST'])

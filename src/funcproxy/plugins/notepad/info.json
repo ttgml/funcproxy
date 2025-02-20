@@ -1,0 +1,11 @@
+{
+    "description": "好记性不如烂笔头，也许AI也要用它记点东西",
+    "enabled": false,
+    "icon": "/icon?id=notepad",
+    "id": "notepad",
+    "size": "3.2MB",
+    "title": "Notepad - 让AI记住一些事情",
+    "type": "func",
+    "updated": "2024-02-15",
+    "version": "5.15.0"
+}
