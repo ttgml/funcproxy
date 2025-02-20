@@ -3,7 +3,7 @@ import uuid
 import json
 import logging
 import os
-from flask import Request
+from flask import Request, current_app
 import requests
 
 def generate_fake_response(model):

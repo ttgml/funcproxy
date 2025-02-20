@@ -1,10 +1,9 @@
 from funcproxy.core.plugin_base import PluginBase
 
 class Plugin(PluginBase):
-
-    
     def __init__(self):
         print("SMTP Plugin initialized")
+        self.install()
     
     def function_call(self, parameters: dict) -> dict:
         result = {
@@ -43,13 +42,13 @@ class Plugin(PluginBase):
         tools.append(fc)
         return tools
     
-    def enable(self) -> dict:
+    def install(self) -> dict:
         return {
             "status": "success",
             "message": "SMTP Plugin enabled successfully"
         }
     
-    def disable(self) -> dict:
+    def uninstall(self) -> dict:
         return {
             "status": "success",
             "message": "SMTP Plugin disabled successfully"
