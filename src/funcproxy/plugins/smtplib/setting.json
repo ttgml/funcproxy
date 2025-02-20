@@ -1,42 +1,42 @@
 {
     "current": {
-        "smtp_server": "smtp.qq.com",
+        "smtp_password": "change_me",
         "smtp_port": "465",
-        "smtp_username": "change_me@qq.com",
-        "smtp_password": "change_me"
+        "smtp_server": "smtp2.qq.com",
+        "smtp_username": "change_me@qq.com"
     },
     "form": [
         {
-            "type": "text",
-            "name": "smtp_server",
+            "default": "smtp.qq.com",
             "label": "SMTP 服务器地址",
+            "name": "smtp_server",
             "placeholder": "smtp.qq.com",
             "required": true,
-            "default": "smtp.qq.com"
+            "type": "text"
         },
         {
-            "type": "text",
-            "name": "smtp_port",
+            "default": "465",
             "label": "SMTP 服务器端口",
+            "name": "smtp_port",
             "placeholder": "465",
             "required": true,
-            "default": "465"
+            "type": "text"
         },
         {
-            "type": "text",
-            "name": "smtp_username",
+            "default": "change_me@qq.com",
             "label": "SMTP 用户名",
+            "name": "smtp_username",
             "placeholder": "change_me@qq.com",
             "required": true,
-            "default": "change_me@qq.com"
+            "type": "text"
         },
         {
-            "type": "password",
-            "name": "smtp_password",
+            "default": "change_me",
             "label": "SMTP 密码",
+            "name": "smtp_password",
             "placeholder": "change_me",
             "required": true,
-            "default": "change_me"
+            "type": "password"
         }
     ]
 }

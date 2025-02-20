@@ -21,12 +21,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = False):
-    """启动带插件系统的 HTTP 服务器
-    Args:
-        port: 监听端口
-        plugin_dir: 插件目录路径
-        debug: 是否启用调试模式
-    """
+    """启动带插件系统的 HTTP 服务器"""
     app = Flask(__name__)
     CORS(app)
     plugin_manager = PluginManager()
@@ -75,7 +70,7 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
         extensions = plugin_manager.get_plugins()
         return jsonify(extensions)
     
-    @app.route('/api/extensions/<string:ext_id>', methods=['GET', 'DELETE', 'PATCH'])
+    @app.route('/api/extensions/<string:ext_id>', methods=['GET', 'DELETE', 'PATCH', 'POST'])
     def get_extension(ext_id):
         extensions = plugin_manager.get_plugins()
         ext = next((e for e in extensions if e["id"] == ext_id), None)
@@ -83,6 +78,7 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
                 return jsonify({"error": "Extension not found"}), 404
         if request.method == 'GET':
             detail = ext.copy()
+            detail['settings'] = plugin_manager.get_plugin_settings(ext_id)
             detail.update({
                 "author": "Example Developer",
                 "website": "https://example.com",
@@ -99,6 +95,9 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
             else:
                 plugin_manager.disable_plugin(ext['id'])
             return jsonify({"success": True, "newStatus": ext['enabled']})
+        if request.method == 'POST':
+            plugin_manager.update_plugin_settings(ext['id'], request.json)
+            return jsonify({"success": True})
 
     @app.route('/api/settings', methods=['GET','POST'])
     def api_settings():

@@ -153,12 +153,18 @@ def proxy_stream_request(request: Request):
                                 for i in final_tool_calls.keys():
                                     data['messages'].append(generate_function_message(final_tool_calls[i]))
                                     result = ""
+                                    arguments = final_tool_calls[i]['function']['arguments']
                                     if final_tool_calls[i]['function']['name'] == "get_current_weather":
                                         result = "23 °C"
                                     if final_tool_calls[i]['function']['name'] == "get_current_location":
                                         result = "北京"
                                     if final_tool_calls[i]['function']['name'] == "get_wallet_balance":
                                         result = "2000 Dollars"
+                                    for tool_name, plugin_name in plugin_manager.tools.items():
+                                        if final_tool_calls[i]['function']['name'] == tool_name:
+                                            plugin = getattr(plugin_manager.enabled_plugins[plugin_name], tool_name)
+                                            print("callit: ", final_tool_calls[i])
+                                            result = str(plugin(arguments))
                                     print("result: ", result)
                                     data['messages'].append({"role": "tool", "content": result, "tool_call_id": final_tool_calls[i]['id']})
                                 process_session = True

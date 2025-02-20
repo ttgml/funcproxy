@@ -1,40 +1,40 @@
 {
     "description": "可以用来发送邮件",
     "enabled": true,
-    "icon": "/icon?id=smtplib",
-    "id": "smtplib",
-    "size": "1.2MB",
-    "title": "SMTP Client",
-    "type": "func",
-    "updated": "2024-02-10",
-    "version": "1.0.0",
     "func": [
         {
-            "name": "send_mail",
-            "func": "do_send_mail",
             "description": "Send an email using SMTP",
+            "func": "do_send_mail",
+            "name": "send_mail",
             "parameters": {
-                "type": "object",
                 "properties": {
-                    "to": {
-                        "type": "string",
-                        "description": "The email address of the recipient"
+                    "body": {
+                        "description": "The body of the email",
+                        "type": "string"
                     },
                     "subject": {
-                        "type": "string",
-                        "description": "The subject of the email"
+                        "description": "The subject of the email",
+                        "type": "string"
                     },
-                    "body": {
-                        "type": "string",
-                        "description": "The body of the email"
+                    "to": {
+                        "description": "The email address of the recipient",
+                        "type": "string"
                     }
                 },
                 "required": [
                     "to",
                     "subject",
                     "body"
-                ]
+                ],
+                "type": "object"
             }
         }
-    ]
+    ],
+    "icon": "/icon?id=smtplib",
+    "id": "smtplib",
+    "size": "1.2MB",
+    "title": "SMTP Client",
+    "type": "func",
+    "updated": "2024-02-10",
+    "version": "1.0.0"
 }

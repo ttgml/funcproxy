@@ -31,7 +31,6 @@ class PluginManager:
                     plugin_info_obj = json.load(open(obj_file, "r"))
                     self.plugins.append(plugin_info_obj)
                     
-
     def get_plugins(self) -> list:
         return self.plugins.copy()
     def disable_plugin(self, plugin_id: str) -> dict:
@@ -82,10 +81,13 @@ class PluginManager:
         return False
     def _unload_plugin(self, plugin_id: str):
         """卸载指定插件"""
-        print(self.enabled_plugins)
+        for func_name, plugin_name in self.tools.items():
+            if plugin_name == plugin_id:
+                self.tools.pop(func_name, None)
         self.enabled_plugins.pop(plugin_id, None)
+
         print(f"remove done.")
-        print(self.enabled_plugins)
+
 
     def get_plugin_tools(self, plugin_id: str) -> list:
         """获取指定插件的函数列表"""
@@ -109,7 +111,24 @@ class PluginManager:
             raise FileNotFoundError(f"插件 {plugin_id} 的信息文件不存在")
         return result
     
+    def get_plugin_settings(self, plugin_id: str) -> dict:
+        result = {}
+        plugin_path = os.path.join(self.plugins_path, plugin_id)
+        plugin_setting_obj = os.path.join(plugin_path, "setting.json")
+        if os.path.exists(plugin_setting_obj):
+            result = json.load(open(plugin_setting_obj, 'r'))
+        return result
     
+    def update_plugin_settings(self, plugin_id: str, current_info: dict):
+        plugin_path = os.path.join(self.plugins_path, plugin_id)
+        plugin_setting_obj = os.path.join(plugin_path, "setting.json")
+        if os.path.exists(plugin_setting_obj):
+            plugin_setting_json = json.load(open(plugin_setting_obj, 'r'))
+            plugin_setting_json['current'].update(current_info)
+            json.dump(plugin_setting_json, open(plugin_setting_obj, 'w'), ensure_ascii=False, indent=4, sort_keys=True)
+            return True
+        else:
+            return False
     def save_plugin_info(self, plugin_id: str, info: dict) -> dict:
         plugin_path = os.path.join(self.plugins_path, plugin_id)
         plugin_info_path = os.path.join(plugin_path, "info.json")

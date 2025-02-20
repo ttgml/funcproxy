@@ -4,14 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>扩展详情</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    </link>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
-        /* 共用样式 */
-        /* ...保持与管理页面相同的样式... */
-
         /* 详情页专用样式 */
         .detail-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 40px auto;
             background: white;
             padding: 30px;
@@ -52,6 +51,75 @@
             margin-top: 30px;
             display: flex;
             gap: 15px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .function-list {
+            background: white;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+        }
+
+        .function-item {
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .function-item:last-child {
+            border-bottom: none;
+        }
+
+        .function-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .function-description {
+            font-size: 13px;
+            color: #5f6368;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .settings-form {
+            margin-top: 30px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        .save-settings {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .save-settings:hover {
+            background-color: #1a5ed8;
         }
     </style>
 </head>
@@ -81,8 +149,15 @@
                 <input type="checkbox" id="toggleEnable">
                 <span class="toggle-slider"></span>
             </label>
-            <button class="remove-button">移除扩展</button>
+            <button class="remove-button" id="uninstall-button">移除扩展</button>
         </div>
+
+        <br>
+
+        <div class="function-list" id="functionList">
+        </div>
+
+        <div class="settings-container"></div>
     </div>
 
     <script>
@@ -94,14 +169,136 @@
                 dataType: 'json'
             })
         };
-        
+
+        function handleToggleStatus(extId) {
+            const newStatus = $('#toggleEnable').prop('checked');
+            $.ajax({
+                url: `/api/extensions/${extId}`,
+                method: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify({ enabled: newStatus })
+            })
+                .done(() => {
+                    showToast(`已${newStatus ? '启用' : '禁用'}扩展`);
+                })
+                .fail((jqXHR) => {
+                    // 使用jQuery直接操作DOM元素
+                    $('#toggleEnable').prop('checked', !newStatus);
+                    showToast(`操作失败: ${jqXHR.responseJSON?.error || '未知错误'}`, 'error');
+                });
+        }
+
+        function handleRemoveExtension(extId, element) {
+            if (!confirm('确定要永久移除该扩展程序吗？')) return;
+            $(element).prop('disabled', true).text('移除中...');
+            $.ajax({
+                url: `/api/extensions/${extId}`,
+                method: 'DELETE'
+            })
+                .done(() => {
+                    $(element).closest('.detail-container').fadeOut(300, function () {
+                        $(this).remove();
+                    });
+                    showToast('扩展已移除');
+                })
+                .fail((jqXHR) => {
+                    // 恢复按钮状态
+                    $(element).prop('disabled', false).text('移除');
+                    showToast(`移除失败: ${jqXHR.responseJSON?.error || '未知错误'}`, 'error');
+                });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = $(`<div class="toast ${type}">${message}</div>`);
+            $('body').append(toast);
+            setTimeout(() => toast.fadeOut(), 3000);
+        }
+
+        function submitSettingsForm(formFields, currentValues, extId) {
+            // 收集表单数据
+            const formData = {};
+            formFields.forEach(field => {
+                formData[field.name] = $(`input[name="${field.name}"]`).val();
+            });
+
+            // 发送AJAX请求
+            $.ajax({
+                url: `/api/extensions/${extId}`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData)
+            })
+                .done(() => {
+                    showToast('设置已保存');
+                    // 可能需要刷新当前页面或更新部分UI
+                })
+                .fail((jqXHR) => {
+                    showToast(`保存失败: ${jqXHR.responseJSON?.error || '未知错误'}`, 'error');
+                });
+        }
+
+        function renderSettingsForm(formFields, currentValues, extId) {
+            const formContainer = $('<div class="settings-form"></div>');
+
+            formFields.forEach(field => {
+                const fieldContainer = $('<div class="form-field"></div>');
+
+                // 创建标签
+                const label = $('<label></label>')
+                    .text(field.label)
+                    .addClass('form-label');
+
+                // 创建输入元素
+                let input;
+                switch (field.type) {
+                    case 'text':
+                    case 'password':
+                        input = $('<input>')
+                            .attr('type', field.type)
+                            .attr('name', field.name)
+                            .attr('placeholder', field.placeholder)
+                            .addClass('form-input');
+                        break;
+                    // 可以扩展其他类型，如textarea、select等
+                    default:
+                        input = $('<input>')
+                            .attr('type', 'text')
+                            .attr('name', field.name)
+                            .attr('placeholder', field.placeholder)
+                            .addClass('form-input');
+                }
+
+                // 设置默认值
+                input.val(currentValues[field.name] || '');
+
+                // 必填项处理
+                if (field.required) {
+                    input.attr('required', true);
+                }
+
+                fieldContainer.append(label).append(input);
+                formContainer.append(fieldContainer);
+            });
+
+            // 添加保存按钮
+            const saveButton = $('<button class="save-settings">保存设置</button>');
+            saveButton.click(function () {
+                submitSettingsForm(formFields, currentValues, extId);
+            });
+
+            formContainer.append(saveButton);
+
+            // 将表单容器添加到页面中，比如放在某个位置
+            $('.detail-container').append(formContainer);
+        }
+
         // 页面初始化
-        $(document).ready(function() {
+        $(document).ready(function () {
             const params = new URLSearchParams(location.search);
             const extId = params.get('id');
-        
+
             API.getExtensionDetail(extId)
-                .done(function(extData) {
+                .done(function (extData) {
                     $('#detailIcon').attr('src', extData.icon);
                     $('#detailTitle').text(extData.title);
                     $('#detailDesc').text(extData.description);
@@ -109,18 +306,46 @@
                     $('#detailSize').text(extData.size);
                     $('#detailUpdated').text(new Date(extData.updated).toLocaleDateString());
                     $('#toggleEnable').prop('checked', extData.enabled);
-        
-                    if(extData.author) {
+
+                    if (extData.author) {
                         $('#detailAuthor').text(extData.author);
                         $('#authorSection').show();
                     }
+
+                    $('#toggleEnable').on('change', function () {
+                        handleToggleStatus(extId);
+                    });
+
+                    $('#uninstall-button').on('click', function (e) {
+                        e.preventDefault();
+                        handleRemoveExtension(extId, this);
+                    });
+
+                    if (extData.func && extData.func.length > 0) {
+                        const functionList = $('#functionList');
+                        functionList.empty();
+                        extData.func.forEach(func => {
+                            functionList.append(`
+                                <div class="function-item">
+                                    <div class="function-title">${func.name}</div>
+                                    <div class="function-description">${func.description}</div>
+                                </div>
+                            `);
+                        });
+                    }
+                    if (extData.settings) {
+                        renderSettingsForm(extData.settings.form, extData.settings.current, extId);
+                    } else {
+                        // 处理settings为空的情况，可能需要隐藏表单区域
+                        $('.settings-form').remove();
+                    }
                 })
-                .fail(function(jqXHR, textStatus, errorThrown) {
+                .fail(function (jqXHR, textStatus, errorThrown) {
                     alert('扩展详情加载失败');
                     window.history.back();
                 });
         });
-        </script>
+    </script>
 </body>
 
 </html>
