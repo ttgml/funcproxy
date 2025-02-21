@@ -153,7 +153,7 @@ def proxy_stream_request(request: Request):
                                 for i in final_tool_calls.keys():
                                     data['messages'].append(generate_function_message(final_tool_calls[i]))
                                     result = ""
-                                    arguments = final_tool_calls[i]['function']['arguments']
+                                    arguments = final_tool_calls[i]['function'].get('arguments',[])
                                     if final_tool_calls[i]['function']['name'] == "get_current_weather":
                                         result = "23 °C"
                                     if final_tool_calls[i]['function']['name'] == "get_current_location":

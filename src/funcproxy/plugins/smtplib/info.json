@@ -36,5 +36,7 @@
     "title": "SMTP Client",
     "type": "func",
     "updated": "2025-02-20",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "author": "Example Developer",
+    "website": "https://example.com"
 }

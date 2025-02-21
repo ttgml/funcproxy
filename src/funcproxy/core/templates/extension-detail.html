@@ -139,7 +139,7 @@
                     最后更新：<span id="detailUpdated"></span>
                 </div>
                 <div id="authorSection" style="display: none;">
-                    开发者：<span id="detailAuthor"></span>
+                    开发者：<a id="detailAuthor"></a>
                 </div>
             </div>
         </div>
@@ -309,6 +309,7 @@
 
                     if (extData.author) {
                         $('#detailAuthor').text(extData.author);
+                        $('#detailAuthor').attr('href', extData.website);
                         $('#authorSection').show();
                     }
 

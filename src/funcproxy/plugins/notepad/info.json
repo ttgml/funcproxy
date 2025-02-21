@@ -43,5 +43,7 @@
     "title": "Notepad - 让AI记住一些事情",
     "type": "func",
     "updated": "2025-02-20",
-    "version": "0.0.1"
+    "version": "0.0.1",
+    "author": "Example Developer",
+    "website": "https://example.com"
 }

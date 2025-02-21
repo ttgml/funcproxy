@@ -26,5 +26,7 @@
     "title": "runenv - 获取当前的环境信息",
     "type": "func",
     "updated": "2025-02-20",
-    "version": "0.0.2"
+    "version": "0.0.2",
+    "author": "Example Developer",
+    "website": "https://example.com"
 }

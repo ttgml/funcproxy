@@ -5,3 +5,4 @@ build
 .venv
 config.json
 notepad.txt
+.DS_store

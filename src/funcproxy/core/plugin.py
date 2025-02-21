@@ -9,6 +9,7 @@ from pathlib import Path
 from threading import Lock
 from typing import List, Dict, Type
 from .plugin_base import PluginBase
+import shutil
 
 logger = logging.getLogger("plugins")
 
@@ -22,6 +23,7 @@ class PluginManager:
         self.init_plugins()
 
     def init_plugins(self):
+        self.plugins = []
         if not self.plugins_path.is_dir():
             raise ValueError(f"Plugin directory not found: {self.plugins_path}")
         for plugin_dir in self.plugins_path.iterdir():
@@ -30,7 +32,7 @@ class PluginManager:
                 if os.path.exists(obj_file):
                     plugin_info_obj = json.load(open(obj_file, "r"))
                     self.plugins.append(plugin_info_obj)
-                    
+
     def get_plugins(self) -> list:
         return self.plugins.copy()
     def disable_plugin(self, plugin_id: str) -> dict:
@@ -88,7 +90,6 @@ class PluginManager:
 
         print(f"remove done.")
 
-
     def get_plugin_tools(self, plugin_id: str) -> list:
         """获取指定插件的函数列表"""
         plugin_info = self.get_plugin_info(plugin_id)
@@ -135,3 +136,46 @@ class PluginManager:
         with open(plugin_info_path, 'w') as f:
             json.dump(info, f, ensure_ascii=False, indent=4, sort_keys=True)
         return self.get_plugin_info(plugin_id)
+    
+    def install_plugin(self, target_plugin_path: str) -> dict:
+        info_path = os.path.join(target_plugin_path, "info.json")
+        init_path = os.path.join(target_plugin_path, "__init__.py")
+        if not os.path.exists(info_path):
+            return {"error": "info.json not found"}
+        if not os.path.exists(init_path):
+            return {"error": "__init__.py not found"}
+        info_obj = {}
+        try:
+            info_obj = json.load(open(info_path, "r"))
+            plugin_id = info_obj.get("id")
+            plugin_name = info_obj.get("name")
+            plugin_title = info_obj.get("title")
+            plugin_type = info_obj.get("type")
+            plugin_description = info_obj.get("description")
+            plugin_author = info_obj.get("author")
+            plugin_version = info_obj.get("version")
+            plugin_func = info_obj.get("func")
+            if plugin_id is None:
+                return {"error": "info.json ['id'] is not valid"}
+            if os.path.exists(os.path.join(self.plugins_path, plugin_id)):
+                return {"error": "plugin already exists"}
+        except Exception as e:
+            return {"error": "plugin info.json is not vaild"}
+        
+        plugin_id = info_obj.get("id")
+        installed_plugin_path = os.path.join(self.plugins_path, plugin_id)
+        try:
+            os.makedirs(installed_plugin_path)
+            # 把 target_plugin_path 下的所有文件复制到 installed_plugin_path
+            for root, dirs, files in os.walk(target_plugin_path):
+                for file in files:
+                    src_file = os.path.join(root, file)
+                    if file.startswith("."):
+                        continue
+                    print("src_file", src_file)
+                    dst_file = os.path.join(installed_plugin_path, os.path.relpath(src_file, target_plugin_path))
+                    shutil.copy2(src_file, dst_file)
+        except Exception as e:
+            print(e)
+            return {"error": "Failed to install plugin"}
+        

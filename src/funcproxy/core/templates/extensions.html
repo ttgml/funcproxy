@@ -4,8 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <title>扩展程序管理</title>
-    <link rel="stylesheet" href="/static/style.css"></link>
+    <link rel="stylesheet" href="/static/style.css">
+    </link>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        .upload-btn {
+            color: #1a73e8;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .upload-btn:hover {
+            background-color: rgba(26, 115, 232, 0.08);
+        }
+    </style>
 </head>
 
 <body>
@@ -47,6 +61,99 @@
             }
         })
     };
+
+    let uploadButton = null;
+    let fileInput = null;
+
+    function handleDeveloperModeChange() {
+        if ($('.dev-mode input').is(':checked')) {
+            addUploadButton();
+        } else {
+            removeUploadButton();
+        }
+    }
+
+    function addUploadButton() {
+        if (!uploadButton) {
+            const toolbarRight = $('.toolbar-right');
+            uploadButton = $('<a>', {
+                id: 'uploadButton',
+                href: '#',
+                text: '上传扩展',
+                class: 'upload-btn'
+            });
+
+            fileInput = $('<input>', {
+                type: 'file',
+                id: 'fileInput',
+                style: 'display: none',
+                accept: '.zip'
+            });
+
+            // toolbarRight.append(uploadButton);
+            // toolbarRight.append(fileInput);
+            uploadButton.insertBefore($('.settings-btn'))
+            fileInput.insertBefore($('.settings-btn'))
+            // toolbarRight.insertAfter(uploadButton)
+            // uploadButton.insertAfter(fileInput)
+
+            // 绑定事件
+            uploadButton.on('click', function (e) {
+                e.preventDefault();
+                fileInput.click();
+            });
+
+            fileInput.on('change', function (e) {
+                const file = e.target.files[0];
+                if (file && file.type === 'application/zip') {
+                    uploadFile(file);
+                } else {
+                    alert('请选择有效的ZIP文件！');
+                    $(this).val('');
+                }
+            });
+        }
+    }
+
+    function removeUploadButton() {
+        if (uploadButton) {
+            uploadButton.remove();
+            fileInput.remove();
+            uploadButton = null;
+            fileInput = null;
+        }
+    }
+
+    function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        $.ajax({
+            url: '/upload/plugin',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: () => {
+                uploadButton.prop('disabled', true);
+                fileInput.prop('disabled', true);
+                showToast('上传中...', 'loading');
+            },
+            success: (response) => {
+                uploadButton.prop('disabled', false);
+                fileInput.prop('disabled', false);
+                showToast('上传成功！');
+                renderExtensions();
+            },
+            error: (jqXHR) => {
+                uploadButton.prop('disabled', false);
+                fileInput.prop('disabled', false);
+                const errorMessage = jqXHR.responseJSON?.error || '上传失败';
+                showToast(errorMessage, 'error');
+            }
+        });
+    }
+
 
     function handleToggleStatus(extId, checkbox) {
         const newStatus = checkbox.checked;
@@ -135,6 +242,7 @@
     // 初始化
     $(document).ready(function () {
         renderExtensions();
+        $('.dev-mode input').on('change', handleDeveloperModeChange);
     });
 </script>
 

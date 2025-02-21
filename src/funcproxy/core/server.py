@@ -9,6 +9,9 @@ import os
 import pkg_resources
 from pathlib import Path
 from gevent.pywsgi import WSGIServer
+import zipfile
+import tempfile
+import shutil
 
 from .plugin import PluginManager
 from .lib import proxy_stream_request, generate_fake_response
@@ -80,8 +83,6 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
             detail = ext.copy()
             detail['settings'] = plugin_manager.get_plugin_settings(ext_id)
             detail.update({
-                "author": "Example Developer",
-                "website": "https://example.com",
                 "full_description": f"{ext['description']} 更多详细信息...",
                 "rating": 4.8
             })
@@ -113,6 +114,26 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
             })
             save_config(app_settings)
             return jsonify({"status": "success"})
+    @app.route('/upload/plugin', methods=['POST'])
+    def upload_plugin():
+        if request.method == 'POST':
+            file = request.files['file']
+            # 检查文件类型，是否是zip文件
+            if file and file.filename.endswith('.zip'):
+                # 解压文件到临时目录
+                temp_dir = tempfile.mkdtemp()
+                file.save(os.path.join(temp_dir, file.filename))
+                with zipfile.ZipFile(os.path.join(temp_dir, file.filename), 'r') as zip_ref:
+                    zip_ref.extractall(temp_dir)
+                print(temp_dir)
+                install_result = plugin_manager.install_plugin(temp_dir)
+                print("install result: ", install_result)
+                shutil.rmtree(temp_dir)
+                if install_result == None:
+                    plugin_manager.init_plugins()
+                    return jsonify({"status": "success", "message": "插件上传成功"})
+                else:
+                    return jsonify({"status": "error", "message": "插件上传失败"})
     @app.route('/v1/chat/completions', methods=['POST'])
     def chat_completions():
         data = request.get_json()
