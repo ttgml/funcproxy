@@ -1,6 +1,6 @@
 {
     "description": "可以联网搜索啦 (还能浏览网页哦)",
-    "enabled": false,
+    "enabled": true,
     "func": [
         {
             "description": "Search for information on the Internet.",

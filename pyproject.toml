@@ -14,7 +14,9 @@ classifiers = [
 
 dependencies = [
   "flask==3.1.0",
-  "click==8.1.8",
+  "Flask-Cors == 5.0.0"
+  "gevent == 24.11.1"
+  "requests == 2.32.3"
 ]
 
 [project.scripts]
@@ -31,4 +33,4 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-"funcproxy.core" = ["templates/*.html", "static/*"]
+"funcproxy.core" = ["templates/*.html", "static/*", "plugins/*]

@@ -1,0 +1,15 @@
+{
+    "current": {
+        "apikey": "fc-ec97007f1c2643b3b202ec4cd2a9e674"
+    },
+    "form": [
+        {
+            "default": "",
+            "label": "Firecrawl API KEY",
+            "name": "apikey",
+            "placeholder": "API KEY",
+            "required": true,
+            "type": "text"
+        }
+    ]
+}
