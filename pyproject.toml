@@ -6,6 +6,10 @@ authors = [
 ]
 description = "funcproxy is a tool for function proxy"
 readme = "README.md"
+
+[metadata]
+license-files = ["LICENSE"]
+
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -14,9 +18,9 @@ classifiers = [
 
 dependencies = [
   "flask==3.1.0",
-  "Flask-Cors == 5.0.0"
-  "gevent == 24.11.1"
-  "requests == 2.32.3"
+  "Flask-Cors == 5.0.0",
+  "gevent == 24.11.1",
+  "requests == 2.32.3",
 ]
 
 [project.scripts]
@@ -33,4 +37,4 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-"funcproxy.core" = ["templates/*.html", "static/*", "plugins/*]
+"funcproxy.core" = ["templates/*.html", "static/*"]
