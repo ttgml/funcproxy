@@ -1,11 +1,47 @@
 {
     "description": "好记性不如烂笔头，也许AI也要用它记点东西",
     "enabled": false,
+    "func": [
+        {
+            "description": "You can record some necessary things in a notebook.",
+            "func": "do_write_notepad",
+            "name": "写笔记",
+            "parameters": {
+                "properties": {
+                    "note": {
+                        "description": "The content that needs to be recorded",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "item"
+                ],
+                "type": "object"
+            }
+        },
+        {
+            "description": "Read the important notes in the notebook.",
+            "func": "do_read_notepad",
+            "name": "读笔记",
+            "parameters": {
+                "properties": {
+                    "keyword": {
+                        "description": "anything",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "item"
+                ],
+                "type": "object"
+            }
+        }
+    ],
     "icon": "/icon?id=notepad",
     "id": "notepad",
     "size": "3.2MB",
     "title": "Notepad - 让AI记住一些事情",
     "type": "func",
-    "updated": "2024-02-15",
-    "version": "5.15.0"
+    "updated": "2025-02-20",
+    "version": "0.0.1"
 }

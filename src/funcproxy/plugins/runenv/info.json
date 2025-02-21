@@ -1,11 +1,30 @@
 {
     "description": "在执行程序之前，我觉得它应该需要知道一些事情",
     "enabled": false,
+    "func": [
+        {
+            "description": "get system version info",
+            "func": "do_get_system_info",
+            "name": "获取系统版本信息",
+            "parameters": {
+                "properties": {
+                    "item": {
+                        "description": "anything",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "item"
+                ],
+                "type": "object"
+            }
+        }
+    ],
     "icon": "/icon?id=runenv",
     "id": "runenv",
-    "size": "15.8MB",
+    "size": "0.01MB",
     "title": "runenv - 获取当前的环境信息",
     "type": "func",
-    "updated": "2024-02-10",
-    "version": "1.45.2"
+    "updated": "2025-02-20",
+    "version": "0.0.2"
 }

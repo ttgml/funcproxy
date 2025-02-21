@@ -1,0 +1,47 @@
+{
+    "description": "可以联网搜索啦 (还能浏览网页哦)",
+    "enabled": false,
+    "func": [
+        {
+            "description": "Search for information on the Internet.",
+            "func": "do_search_online",
+            "name": "联网搜索",
+            "parameters": {
+                "properties": {
+                    "keyword": {
+                        "description": "any search keyword",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "keyword"
+                ],
+                "type": "object"
+            }
+        },
+        {
+            "description": "Get the content of a URL webpage.",
+            "func": "do_open_website",
+            "name": "访问URL地址",
+            "parameters": {
+                "properties": {
+                    "url": {
+                        "description": "url link",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "url"
+                ],
+                "type": "object"
+            }
+        }
+    ],
+    "icon": "/icon?id=web_search",
+    "id": "web_search",
+    "size": "0.01MB",
+    "title": "online search - 检索互联网上的信息",
+    "type": "func",
+    "updated": "2025-02-21",
+    "version": "0.0.2"
+}

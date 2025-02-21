@@ -4,9 +4,8 @@ import json
 class Plugin(PluginBase):
     def __init__(self):
         print("SMTP Plugin initialized")
-        self.plugin_id = "smtplib"
     
-    def do_send_mail(self, parameters: dict) -> dict:
+    def do_send_mail(self, parameters) -> dict:
         # 使用smtplib发送邮件
         result = {}
         settings = self.get_settings()
