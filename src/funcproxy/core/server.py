@@ -133,7 +133,7 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
                     plugin_manager.init_plugins()
                     return jsonify({"status": "success", "message": "插件上传成功"})
                 else:
-                    return jsonify({"status": "error", "message": "插件上传失败"})
+                    return jsonify({"status": "error", "message": install_result['error']}),400
     @app.route('/v1/chat/completions', methods=['POST'])
     def chat_completions():
         data = request.get_json()

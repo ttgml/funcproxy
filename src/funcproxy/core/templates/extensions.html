@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/static/style.css">
     </link>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/static/lib.js"></script>
     <style>
         .upload-btn {
             color: #1a73e8;
@@ -144,7 +145,7 @@
             error: (jqXHR) => {
                 uploadButton.prop('disabled', false);
                 fileInput.prop('disabled', false);
-                const errorMessage = jqXHR.responseJSON?.error || '上传失败';
+                const errorMessage = jqXHR.responseJSON?.message || '上传失败';
                 showToast(errorMessage, 'error');
             }
         });
@@ -185,12 +186,6 @@
                 $(element).prop('disabled', false).text('移除');
                 showToast(`移除失败: ${jqXHR.responseJSON?.error || '未知错误'}`, 'error');
             });
-    }
-
-    function showToast(message, type = 'success') {
-        const toast = $(`<div class="toast ${type}">${message}</div>`);
-        $('body').append(toast);
-        setTimeout(() => toast.fadeOut(), 3000);
     }
 
     // 渲染扩展列表

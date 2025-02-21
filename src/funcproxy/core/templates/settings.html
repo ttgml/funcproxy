@@ -6,6 +6,7 @@
     <title>设置</title>
     <link rel="stylesheet" href="/static/style.css"></link>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/static/lib.js"></script>
     <style>
         /* 共用样式 */
         body {
@@ -152,8 +153,8 @@
                 contentType: 'application/json',
                 data: JSON.stringify(payload)
             })
-                .done(() => alert('配置保存成功'))
-                .fail(() => alert('保存失败'))
+                .done(() => showToast("保存成功！", "success"))
+                .fail(() => showToast("保存失败", "error"))
                 .always(() => {
                     $('.save-button').prop('disabled', false).text('保存配置');
                 });

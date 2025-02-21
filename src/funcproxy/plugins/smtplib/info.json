@@ -1,4 +1,5 @@
 {
+    "author": "Example Developer",
     "description": "可以用来发送邮件",
     "enabled": false,
     "func": [
@@ -37,6 +38,5 @@
     "type": "func",
     "updated": "2025-02-20",
     "version": "1.0.0",
-    "author": "Example Developer",
     "website": "https://example.com"
 }

@@ -1,6 +1,7 @@
 {
+    "author": "Example Developer",
     "description": "可以联网搜索啦 (还能浏览网页哦)",
-    "enabled": true,
+    "enabled": false,
     "func": [
         {
             "description": "Search for information on the Internet.",
@@ -44,6 +45,5 @@
     "type": "func",
     "updated": "2025-02-21",
     "version": "0.0.2",
-    "author": "Example Developer",
     "website": "https://example.com"
 }
