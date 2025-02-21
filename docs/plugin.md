@@ -48,7 +48,7 @@ class Plugin(PluginBase):
 
 ```
 
-4. [可选]如果扩展需要引入配置项的话，可以在`my_extension`文件夹下创建 setting.json 文件，并添加以下内容：
+4. [可选]如果扩展需要引入配置项的话，可以在`my_extension`文件夹下创建 setting.json 文件，并添加以下内容，在扩展详情页面会自动生成表单：
 ```json
 {
     "current": {

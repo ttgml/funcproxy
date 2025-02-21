@@ -19,3 +19,6 @@ docker run --name funcproxy -it -d -p 7777:7777 funcproxy:v1
 
 4. 配置客户端
 ![chatbox](./docs/chatbox.png)
+
+## 制作插件
+[Plugin](./docs/plugin.md)
