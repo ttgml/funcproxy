@@ -112,11 +112,11 @@
                 <div class="form-description">用于身份验证的密钥</div>
             </div>
 
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label>模型名称</label>
                 <input type="text" id="modelName" class="form-input" placeholder="qwen-max">
                 <div class="form-description">选择使用的模型版本</div>
-            </div>
+            </div> -->
 
             <button class="save-button" onclick="saveSettings()">保存配置</button>
         </div>
@@ -132,7 +132,7 @@
                 .done(data => {
                     $('#apiDomain').val(data.apiDomain);
                     $('#apiKey').val(data.apiKey);
-                    $('#modelName').val(data.modelName);
+                    // $('#modelName').val(data.modelName);
                 })
                 .fail(() => alert('获取配置失败'));
         }
@@ -142,7 +142,7 @@
             const payload = {
                 apiDomain: $('#apiDomain').val(),
                 apiKey: $('#apiKey').val(),
-                modelName: $('#modelName').val()
+                // modelName: $('#modelName').val()
             };
 
             $('.save-button').prop('disabled', true).text('保存中...');

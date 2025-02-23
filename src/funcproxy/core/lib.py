@@ -59,7 +59,7 @@ def process_standard_request(request: Request) -> dict:
     for tool_name, plugin_name in plugin_manager.tools.items():
         logger.debug("tools name: %s %s", tools, plugin_name)
         tools = plugin_manager.enabled_plugins[plugin_name].add_function(tools)
-    data['model'] = proxy_config['modelName']
+    # data['model'] = proxy_config['modelName']
     if len(tools) > 0:
         data["tools"] = tools
     headers = {
@@ -183,7 +183,7 @@ def process_stream_request(request: Request):
         logger.debug("tools name: %s", tools, plugin_name)
         tools = plugin_manager.enabled_plugins[plugin_name].add_function(tools)
     logger.debug("tools result: %s", tools)
-    data['model'] = proxy_config['modelName']
+    # data['model'] = proxy_config['modelName']
     if len(tools) > 0:
         data["tools"] = tools
     headers = {
