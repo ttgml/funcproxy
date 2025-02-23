@@ -6,6 +6,7 @@ import os
 from flask import Request, current_app
 import requests
 
+logger = logging.getLogger(__name__)
 def generate_fake_response(model):
     """生成模拟的OpenAI响应结构"""
     return {
@@ -56,7 +57,7 @@ def process_standard_request(request: Request) -> dict:
     plugin_manager = get_plugin_manager()
     tools = []
     for tool_name, plugin_name in plugin_manager.tools.items():
-        print("tools name: ", tools, plugin_name)
+        logger.debug("tools name: ", tools, plugin_name)
         tools = plugin_manager.enabled_plugins[plugin_name].add_function(tools)
     data['model'] = proxy_config['modelName']
     if len(tools) > 0:
@@ -71,9 +72,12 @@ def process_standard_request(request: Request) -> dict:
         try:
             response = requests.post(url, json=data, headers=headers, stream=False)
             final_tool_calls = {}
-            print("data: ",json.dumps(data))
+            logger.debug("data: ",json.dumps(data))
             resp = response.json()
-            print("resp: ",json.dumps(resp))
+            logger.debug("resp: ",json.dumps(resp))
+            if response.status_code != 200:
+                logger.debug("Error: ", response.status_code, response.text)
+                return dict(resp)
             for ms in resp['choices']:
                 if ms['message'].get('tool_calls', None) == None:
                     return response.json()
@@ -87,16 +91,16 @@ def process_standard_request(request: Request) -> dict:
                                 data['messages'].append(generate_function_message(function_call))
                                 try:
                                     plugin = getattr(plugin_manager.enabled_plugins[plugin_name], tool_name)
-                                    print("arguments: ", arguments)
+                                    logger.debug("arguments: ", arguments)
                                     result = plugin(arguments)
                                 except Exception as e:
-                                    print("Error: ", e)
+                                    logger.debug("Error: ", e)
                                     result = "Error: " + str(e)
                                 data['messages'].append({"role": "tool", "content": result, "tool_call_id": function_call['id']})                    
         except Exception as e:
-            print("Error: ", e)
+            logger.debug("Error: ", e)
             return {}
-    print("process end")
+    logger.debug("process end")
 def generate_stream_response(model, delay=0.2):
     content_chunks = ["这是", "一个", "模拟的", "OpenAI", "流式", "响应"]
     for index, chunk in enumerate(content_chunks):
@@ -116,6 +120,22 @@ def generate_stream_response(model, delay=0.2):
         yield f"data: {json.dumps(data)}\n\n"
         time.sleep(delay)
     yield "data: [DONE]\n\n"
+
+def generate_stream_error_response(context: str):
+    data = {
+        "id": "chatcmpl-" + str(uuid.uuid4()),
+        "object": "chat.completion.chunk",
+        "created": int(time.time()),
+        "model": "funcproxy",
+        "choices": [{
+            "index": 0,
+            "delta": {
+                "content": context
+            },
+            "finish_reason": "stop"
+        }]
+    }
+    return json.dumps(data)
 
 def generate_stream_data(id: str, model:str, content: str, finish_reason: str):
     fake_response_data = {
@@ -190,12 +210,6 @@ def process_stream_request(request: Request):
                                     data['messages'].append(generate_function_message(final_tool_calls[i]))
                                     result = ""
                                     arguments = final_tool_calls[i]['function'].get('arguments',[])
-                                    if final_tool_calls[i]['function']['name'] == "get_current_weather":
-                                        result = "23 °C"
-                                    if final_tool_calls[i]['function']['name'] == "get_current_location":
-                                        result = "北京"
-                                    if final_tool_calls[i]['function']['name'] == "get_wallet_balance":
-                                        result = "2000 Dollars"
                                     for tool_name, plugin_name in plugin_manager.tools.items():
                                         if final_tool_calls[i]['function']['name'] == tool_name:
                                             plugin = getattr(plugin_manager.enabled_plugins[plugin_name], tool_name)
@@ -230,19 +244,32 @@ def process_stream_request(request: Request):
                                 print(f"Invalid JSON: {chunk_str}")
                     else:
                         print(f"Unexpected chunk: {chunk_str}")
+                        yield "data: " + str(generate_stream_error_response(chunk_str)) + "\n\n"
+                        yield "[DONE]"
                         process_session = False
                         break
         except Exception as e:
-            print(f"Error: ", e)
+            error_msg = "error: " + str(e)
+            yield "data: " + str(generate_stream_error_response(error_msg)) + "\n\n"
+            yield "[DONE]"
+            process_session = False
         finally:
             response.close()
     print("process end")
 
-
+def process_models_request(request: Request):
+    proxy_config = load_config()
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {proxy_config['apiKey']}"
+    }
+    url = f"{proxy_config['apiDomain']}/v1/models"
+    response = requests.get(url, headers=headers)
+    return response.json()
 def load_config():
     """从配置文件中加载设置"""
     CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), 'config.json')
-    print(f"Loading config from {CONFIG_FILE_PATH}")
+    logging.info(f"Loading config from {CONFIG_FILE_PATH}")
     if os.path.exists(CONFIG_FILE_PATH):
         with open(CONFIG_FILE_PATH, 'r') as f:
             return json.load(f)

@@ -5,7 +5,7 @@ from flask import Flask, request, Response, send_file
 from flask import render_template, stream_with_context, jsonify
 from flask_cors import CORS
 import json
-import os
+import os, sys
 import pkg_resources
 from pathlib import Path
 from gevent.pywsgi import WSGIServer
@@ -14,16 +14,12 @@ import tempfile
 import shutil
 
 from .plugin import PluginManager
-from .lib import process_stream_request, process_standard_request
+from .lib import process_stream_request, process_standard_request, process_models_request
 
 from .lib import load_config, save_config
 
 
-logger = logging.getLogger("funcproxy")
-logger.setLevel(logging.INFO)
-logger.addHandler(logging.StreamHandler())
-
-def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = False):
+def start_server(port: int = 8000, debug: bool = False):
     """启动带插件系统的 HTTP 服务器"""
     app = Flask(__name__)
     CORS(app)
@@ -151,6 +147,10 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
         else:
             return jsonify(process_standard_request(request))
 
+    @app.route('/v1/models', methods=['GET'])
+    def get_models():
+        return jsonify(process_models_request(request))
+
     # 配置请求处理管道
     @app.before_request
     def before_request_hooks():
@@ -167,13 +167,22 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
 
     # 添加调试端点（仅限调试模式）
     if debug:
-        @app.route('/_hook_tool/status')
+        log_level = logging.DEBUG
+        
+        @app.route('/status')
         def status():
             return {
                 "status": "running"
             }
+    else:
+        log_level = logging.INFO
 
     try:
+        logging.basicConfig(
+            level=log_level,
+            stream=sys.stdout
+        )
+        logger = logging.getLogger(__name__)
         logger.info(f"Starting server on port {port}")
         http_server = WSGIServer(('0.0.0.0', port), app)
         http_server.serve_forever()

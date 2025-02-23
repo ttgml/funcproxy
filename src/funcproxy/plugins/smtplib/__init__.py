@@ -3,8 +3,7 @@ import json
 
 class Plugin(PluginBase):
     def __init__(self):
-        print("SMTP Plugin initialized")
-    
+        self.logger.info("SMTP Plugin initialized")
     def do_send_mail(self, parameters) -> dict:
         # 使用smtplib发送邮件
         result = {}
@@ -14,7 +13,6 @@ class Plugin(PluginBase):
             import smtplib
             from email.mime.text import MIMEText
             msg = MIMEText(parameters["body"])
-            print("what?")
             msg['From'] = settings['smtp_username']
             msg['To'] = parameters["to"]
             msg['Subject'] = parameters["subject"]
@@ -25,11 +23,11 @@ class Plugin(PluginBase):
                 "status": "success",
                 "message": "发送成功"
             }
-            print("smtplib call: ", parameters)
+            self.logger.debug("smtplib call: ", parameters)
         except Exception as e:
-            print(e)
-            print(settings)
-            print("smtplib call: ", parameters)
+            self.logger.error(e)
+            self.logger.debug(settings)
+            self.logger.error("smtplib call: ", parameters)
             result = {
                 "status": "error",
                 "message": "发送失败"

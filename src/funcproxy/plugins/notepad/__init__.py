@@ -4,7 +4,7 @@ import os
 
 class Plugin(PluginBase):
     def __init__(self):
-        print("Notepad Plugin initialized")
+        self.logger.info("Notepad Plugin initialized")
         self.notepad_path = os.path.join(self.get_plugin_path(),"notepad.txt")
 
     def do_write_notepad(self, parameters) -> str:

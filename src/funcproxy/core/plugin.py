@@ -11,7 +11,7 @@ from typing import List, Dict, Type
 from .plugin_base import PluginBase
 import shutil
 
-logger = logging.getLogger("plugins")
+logger = logging.getLogger(__name__)
 
 class PluginManager:
     def __init__(self):
@@ -43,7 +43,7 @@ class PluginManager:
             self.save_plugin_info(plugin_id, plugin['info'])
             self._unload_plugin(plugin_id)
         except Exception as e:
-            print(e)
+            logger.error(f"禁用插件 {plugin_id} 失败: {e}")
     def enable_plugin(self, plugin_id: str) -> bool:
         """启用插件"""
         try:
@@ -52,7 +52,7 @@ class PluginManager:
             self.save_plugin_info(plugin_id, plugin['info'])
             self._load_plugin(plugin_id)
         except Exception as e:
-            print(e)
+            logger.error(f"启用插件 {plugin_id} 失败: {e}")
     def load_plugins_from_dir(self):
         """从目录加载所有插件"""
         if not self.plugins_path.is_dir():
@@ -64,31 +64,33 @@ class PluginManager:
                     plugin_info_obj = json.load(open(obj_file, "r"))
                     if plugin_info_obj["enabled"]:
                         self._load_plugin(plugin_info_obj['id'])
-        print("load plugins from dir finish.")
+        logger.info("Loaded plugins: %s" % self.enabled_plugins)
 
     def _load_plugin(self, plugin_id: str) -> bool:
         """加载指定插件"""
-        print(f"Loading plugin from {plugin_id}")
+        logger.info(f"Loading plugin {plugin_id}")
         module_name = plugin_id
         module = importlib.import_module(f"funcproxy.plugins.{module_name}")
         for attr in dir(module):
             cls = getattr(module, attr)
             if isinstance(cls, type) and issubclass(cls, PluginBase) and cls is not PluginBase:
                 self.enabled_plugins[module_name] = cls()
-                print(f"add done.")
                 for tool in self.get_plugin_tools(module_name):
                     self.tools[tool['func']] = module_name
-                    print("add func: ", tool['func'])
+                    logger.debug(f"Loaded plugin: ", tool['func'])
                 return True
         return False
     def _unload_plugin(self, plugin_id: str):
         """卸载指定插件"""
-        for func_name, plugin_name in self.tools.items():
+        removed_funcs = []
+        for func_name, plugin_name in list(self.tools.items()):
             if plugin_name == plugin_id:
-                self.tools.pop(func_name, None)
+                removed_funcs.append(func_name)
+        for func_name in removed_funcs:
+            self.tools.pop(func_name, None)
         self.enabled_plugins.pop(plugin_id, None)
-
-        print(f"remove done.")
+        logger.debug(f"Removed plugin '{plugin_id}'. Functions: {removed_funcs}")
+        
 
     def get_plugin_tools(self, plugin_id: str) -> list:
         """获取指定插件的函数列表"""
@@ -160,6 +162,7 @@ class PluginManager:
             if os.path.exists(os.path.join(self.plugins_path, plugin_id)):
                 return {"error": "plugin already exists"}
         except Exception as e:
+            logger.debug(e)
             return {"error": "plugin info.json is not vaild"}
         
         plugin_id = info_obj.get("id")
@@ -172,10 +175,9 @@ class PluginManager:
                     src_file = os.path.join(root, file)
                     if file.startswith("."):
                         continue
-                    print("src_file", src_file)
                     dst_file = os.path.join(installed_plugin_path, os.path.relpath(src_file, target_plugin_path))
                     shutil.copy2(src_file, dst_file)
         except Exception as e:
-            print(e)
+            logger.debug(f"Failed to install plugin: {e}")
             return {"error": "Failed to install plugin"}
         

@@ -4,7 +4,7 @@ import requests
 
 class Plugin(PluginBase):
     def __init__(self):
-        print("Web Search Plugin initialized")
+        self.logger.info("Web Search Plugin initialized")
         self.firecrawl_api = "https://api.firecrawl.dev/v1/scrape"
 
     def do_search_online(self, parameters) -> str:
@@ -28,5 +28,5 @@ class Plugin(PluginBase):
                     return response.json()["data"]["markdown"]
             return "not found"
         except Exception as e:
-            print(e)
+            self.logger.error(e)
             return "not found"

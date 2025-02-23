@@ -3,7 +3,7 @@ import json
 
 class Plugin(PluginBase):
     def __init__(self):
-        print("Runenv Plugin initialized")
+        self.logger.info("Runenv Plugin initialized")
 
     def do_get_system_info(self, parameters) -> str:
         return "v0.1"

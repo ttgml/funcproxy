@@ -1,6 +1,7 @@
 {
+    "author": "Example Developer",
     "description": "好记性不如烂笔头，也许AI也要用它记点东西",
-    "enabled": false,
+    "enabled": true,
     "func": [
         {
             "description": "You can record some necessary things in a notebook.",
@@ -44,6 +45,5 @@
     "type": "func",
     "updated": "2025-02-20",
     "version": "0.0.1",
-    "author": "Example Developer",
     "website": "https://example.com"
 }

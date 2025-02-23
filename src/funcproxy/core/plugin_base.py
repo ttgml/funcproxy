@@ -3,9 +3,12 @@ import sys
 import os
 import json
 from pathlib import Path
+import logging
+
 
 class PluginBase:
 
+    logger = logging.getLogger(__name__)
     def __init__(self):
         raise NotImplementedError("PluginBase is not implemented")
     
