@@ -15,12 +15,12 @@ class Plugin(PluginBase):
             from email.mime.text import MIMEText
             msg = MIMEText(parameters["body"])
             print("what?")
-            msg['From'] = settings['current']['smtp_username']
+            msg['From'] = settings['smtp_username']
             msg['To'] = parameters["to"]
             msg['Subject'] = parameters["subject"]
-            with smtplib.SMTP_SSL(settings['current']['smtp_server'], int(settings['current']['smtp_port'])) as server:
-                server.login(settings["current"]['smtp_username'], settings['current']['smtp_password'])
-                server.sendmail(from_addr=settings["current"]['smtp_username'], to_addrs=parameters["to"], msg=msg.as_string())
+            with smtplib.SMTP_SSL(settings['smtp_server'], int(settings['smtp_port'])) as server:
+                server.login(settings['smtp_username'], settings['smtp_password'])
+                server.sendmail(from_addr=settings['smtp_username'], to_addrs=parameters["to"], msg=msg.as_string())
             result = {
                 "status": "success",
                 "message": "发送成功"

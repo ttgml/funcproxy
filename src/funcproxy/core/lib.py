@@ -28,6 +28,75 @@ def generate_fake_response(model):
         }
     }
 
+def generate_standard_response(content:str, model="funcproxy"):
+    obj = {
+        "id": "chatcmpl-" + str(uuid.uuid4()),
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": model,
+        "choices": [{
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": str(content)
+            },
+            "finish_reason": "stop"
+        }],
+        "usage": {
+            "prompt_tokens": 10,
+            "completion_tokens": 20,
+            "total_tokens": 30
+        }
+    }
+
+def process_standard_request(request: Request) -> dict:
+    data = request.get_json()
+    proxy_config = load_config()
+
+    plugin_manager = get_plugin_manager()
+    tools = []
+    for tool_name, plugin_name in plugin_manager.tools.items():
+        print("tools name: ", tools, plugin_name)
+        tools = plugin_manager.enabled_plugins[plugin_name].add_function(tools)
+    data['model'] = proxy_config['modelName']
+    if len(tools) > 0:
+        data["tools"] = tools
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {proxy_config['apiKey']}"
+    }
+    url = f"{proxy_config['apiDomain']}/v1/chat/completions"
+    process_session = True
+    while process_session:
+        try:
+            response = requests.post(url, json=data, headers=headers, stream=False)
+            final_tool_calls = {}
+            print("data: ",json.dumps(data))
+            resp = response.json()
+            print("resp: ",json.dumps(resp))
+            for ms in resp['choices']:
+                if ms['message'].get('tool_calls', None) == None:
+                    return response.json()
+                for function_call in ms['message']['tool_calls']:
+                    if function_call['type'] == 'function':
+                        for tool_name, plugin_name in plugin_manager.tools.items():
+                            if function_call['function']['name'] == tool_name:
+                                final_tool_calls[function_call['id']] = function_call
+                                result = ""
+                                arguments = function_call['function'].get('arguments',[])
+                                data['messages'].append(generate_function_message(function_call))
+                                try:
+                                    plugin = getattr(plugin_manager.enabled_plugins[plugin_name], tool_name)
+                                    print("arguments: ", arguments)
+                                    result = plugin(arguments)
+                                except Exception as e:
+                                    print("Error: ", e)
+                                    result = "Error: " + str(e)
+                                data['messages'].append({"role": "tool", "content": result, "tool_call_id": function_call['id']})                    
+        except Exception as e:
+            print("Error: ", e)
+            return {}
+    print("process end")
 def generate_stream_response(model, delay=0.2):
     content_chunks = ["这是", "一个", "模拟的", "OpenAI", "流式", "响应"]
     for index, chunk in enumerate(content_chunks):
@@ -83,43 +152,10 @@ def generate_function_message(tool_call: dict):
 
 def get_plugin_manager():
     return current_app.plugin_manager
-def proxy_stream_request(request: Request):
+def process_stream_request(request: Request):
     data = request.get_json()
     proxy_config = load_config()
     # print(proxy_config)
-
-    # tools = [
-    #     {
-    #         "type": "function",
-    #         "function": {
-    #             "name": "get_current_weather",
-    #             "description": "Get the current weather in a given location",
-    #             "parameters": {
-    #                 "type": "object",
-    #                 "properties": {
-    #                     "location": {
-    #                         "type": "string",
-    #                         "description": "The city and state, e.g. San Francisco, CA",
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     },
-    #     {
-    #         "type": "function",
-    #         "function": {
-    #             "name": "get_current_location",
-    #             "description": "Get the current location"
-    #         }
-    #     },
-    #     {
-    #         "type": "function",
-    #         "function": {
-    #             "name": "get_wallet_balance",
-    #             "description": "Get the wallet balance."
-    #         }
-    #     },
-    # ]
 
     plugin_manager = get_plugin_manager()
     tools = []
@@ -222,37 +258,3 @@ def save_config(config):
     CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), 'config.json')
     with open(CONFIG_FILE_PATH, 'w') as f:
         json.dump(config, f, indent=4)
-
-
-extensions = [
-            {
-                "id": "notepad",
-                "icon": "/icon?id=notepad",
-                "title": "Notepad - 让AI记住一些事情",
-                "description": "AI可以在适当的时候记录一些事情",
-                "version": "5.15.0",
-                "size": "3.2MB",
-                "updated": "2024-02-15",
-                "enabled": True
-            },
-            {
-                "id": "runenv",
-                "icon": "/icon?id=runenv",
-                "title": "runenv - 获取当前的环境信息",
-                "description": "在执行程序之前，我觉得它应该需要知道一些事情",
-                "version": "1.45.2",
-                "size": "15.8MB",
-                "updated": "2024-02-10",
-                "enabled": False
-            },
-            {
-                "id": "smtplib",
-                "icon": "/icon?id=smtplib",
-                "title": "SMTP Client",
-                "description": "可以用来发送邮件",
-                "version": "1.0.0",
-                "size": "1.2MB",
-                "updated": "2024-02-10",
-                "enabled": False
-            }
-        ]

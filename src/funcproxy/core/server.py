@@ -14,7 +14,7 @@ import tempfile
 import shutil
 
 from .plugin import PluginManager
-from .lib import proxy_stream_request, generate_fake_response
+from .lib import process_stream_request, process_standard_request
 
 from .lib import load_config, save_config
 
@@ -107,12 +107,18 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
             return jsonify(app_settings)
         if request.method == 'POST':
             data = request.json
-            app_settings.update({
-                "apiDomain": data.get('apiDomain', app_settings['apiDomain']),
-                "apiKey": data.get('apiKey', app_settings['apiKey']),
-                "modelName": data.get('modelName', app_settings['modelName'])
-            })
-            save_config(app_settings)
+            try:
+                if data.get('apiDomain')[-1] == '/':
+                    data['apiDomain'] = data['apiDomain'][:-1]
+                app_settings.update({
+                    "apiDomain": data.get('apiDomain', app_settings['apiDomain']),
+                    "apiKey": data.get('apiKey', app_settings['apiKey']),
+                    "modelName": data.get('modelName', app_settings['modelName'])
+                })
+                save_config(app_settings)
+            except Exception as e:
+                logger.error(f"Failed to update settings: {str(e)}")
+                return jsonify({"status": "error", "message": "Failed to update settings"}),400
             return jsonify({"status": "success"})
     @app.route('/upload/plugin', methods=['POST'])
     def upload_plugin():
@@ -141,8 +147,9 @@ def start_server(port: int = 8000, plugin_dir: str = "plugins", debug: bool = Fa
         # print(json.dumps(data))
         # print(request.headers)
         if stream:
-            return stream_with_context(proxy_stream_request(request))
-        return jsonify(generate_fake_response("model"))
+            return stream_with_context(process_stream_request(request))
+        else:
+            return jsonify(process_standard_request(request))
 
     # 配置请求处理管道
     @app.before_request

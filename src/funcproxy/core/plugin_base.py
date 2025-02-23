@@ -28,10 +28,11 @@ class PluginBase:
                 "type": "function",
                 "function": {
                     "name": func_item.get("func"),
-                    "description": func_item.get("description"),
-                    "parameters": func_item.get("parameters")
+                    "description": func_item.get("description")
                 }
             }
+            if func_item.get("parameters", None) != None:
+                item['function']["parameters"] = func_item.get("parameters")
             tools.append(item)
         return tools
     
@@ -41,7 +42,8 @@ class PluginBase:
         """
         plugin_path = self.get_plugin_path()
         plugin_settings = json.load(open(os.path.join(plugin_path, "setting.json"),'r'))
-        return plugin_settings
+        plugin_current_setting = plugin_settings.get("current",{})
+        return plugin_current_setting
     def enable(self) -> dict:
         """
         Enable the plugin.

@@ -16,7 +16,7 @@ class Plugin(PluginBase):
         setting = self.get_settings()
         try:
             headers = {
-                "Authorization": "Bearer " + setting['current']["apikey"]
+                "Authorization": "Bearer " + setting["apikey"]
             }
             data = {
                 "url": parameters["url"],
