@@ -77,7 +77,7 @@ class PluginManager:
                 self.enabled_plugins[module_name] = cls()
                 for tool in self.get_plugin_tools(module_name):
                     self.tools[tool['func']] = module_name
-                    logger.debug(f"Loaded plugin: ", tool['func'])
+                    logger.debug(f"Loaded plugin: %s", tool['func'])
                 return True
         return False
     def _unload_plugin(self, plugin_id: str):

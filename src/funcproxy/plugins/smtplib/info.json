@@ -1,7 +1,7 @@
 {
     "author": "Example Developer",
     "description": "可以用来发送邮件",
-    "enabled": false,
+    "enabled": true,
     "func": [
         {
             "description": "Send an email using SMTP",

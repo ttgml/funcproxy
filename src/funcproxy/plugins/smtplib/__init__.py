@@ -23,11 +23,11 @@ class Plugin(PluginBase):
                 "status": "success",
                 "message": "发送成功"
             }
-            self.logger.debug("smtplib call: ", parameters)
+            self.logger.debug("smtplib call: %s", parameters)
         except Exception as e:
             self.logger.error(e)
             self.logger.debug(settings)
-            self.logger.error("smtplib call: ", parameters)
+            self.logger.error("smtplib call: %s", parameters)
             result = {
                 "status": "error",
                 "message": "发送失败"
