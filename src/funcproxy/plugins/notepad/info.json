@@ -38,7 +38,6 @@
             }
         }
     ],
-    "icon": "/icon?id=notepad",
     "id": "notepad",
     "size": "3.2MB",
     "title": "Notepad - 让AI记住一些事情",

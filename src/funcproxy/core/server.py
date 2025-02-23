@@ -48,7 +48,7 @@ def start_server(port: int = 8000, debug: bool = False):
     def get_icon_img():
         if request.method == 'GET':
             plugin_path = Path(__file__).parent.parent / "plugins"
-            print(plugin_path)
+            logger.debug(plugin_path)
             plugin_id = request.args.get('id','404')
             icon_path = os.path.join( plugin_path , plugin_id , "icon.png")
             if os.path.exists(icon_path):
@@ -127,9 +127,9 @@ def start_server(port: int = 8000, debug: bool = False):
                 file.save(os.path.join(temp_dir, file.filename))
                 with zipfile.ZipFile(os.path.join(temp_dir, file.filename), 'r') as zip_ref:
                     zip_ref.extractall(temp_dir)
-                print(temp_dir)
+                logger.debug(temp_dir)
                 install_result = plugin_manager.install_plugin(temp_dir)
-                print("install result: ", install_result)
+                logger.debug("install result: ", install_result)
                 shutil.rmtree(temp_dir)
                 if install_result == None:
                     plugin_manager.init_plugins()
@@ -140,8 +140,8 @@ def start_server(port: int = 8000, debug: bool = False):
     def chat_completions():
         data = request.get_json()
         stream = data.get("stream", False)
-        # print(json.dumps(data))
-        # print(request.headers)
+        # logger.debug(json.dumps(data))
+        # logger.debug(request.headers)
         if stream:
             return stream_with_context(process_stream_request(request))
         else:
@@ -180,6 +180,7 @@ def start_server(port: int = 8000, debug: bool = False):
     try:
         logging.basicConfig(
             level=log_level,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             stream=sys.stdout
         )
         logger = logging.getLogger(__name__)

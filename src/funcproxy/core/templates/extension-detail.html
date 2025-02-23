@@ -294,7 +294,7 @@
 
             API.getExtensionDetail(extId)
                 .done(function (extData) {
-                    $('#detailIcon').attr('src', extData.icon);
+                    $('#detailIcon').attr('src', "/icon?id="+extData.id);
                     $('#detailTitle').text(extData.title);
                     $('#detailDesc').text(extData.description);
                     $('#detailVersion').text(extData.version);

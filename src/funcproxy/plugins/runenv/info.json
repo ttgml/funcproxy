@@ -20,7 +20,6 @@
             }
         }
     ],
-    "icon": "/icon?id=runenv",
     "id": "runenv",
     "size": "0.01MB",
     "title": "runenv - 获取当前的环境信息",

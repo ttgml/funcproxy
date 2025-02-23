@@ -38,7 +38,6 @@
             }
         }
     ],
-    "icon": "/icon?id=web_search",
     "id": "web_search",
     "size": "0.01MB",
     "title": "online search - 检索互联网上的信息",

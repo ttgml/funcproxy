@@ -31,7 +31,6 @@
             }
         }
     ],
-    "icon": "/icon?id=smtplib",
     "id": "smtplib",
     "size": "0.02MB",
     "title": "SMTP Client",

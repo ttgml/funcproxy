@@ -197,7 +197,7 @@
                 response.forEach(ext => {
                     list.append(`
                         <div class="extension-item" data-id="${ext.id}">
-                            <img src="${ext.icon}" class="extension-icon" alt="扩展图标">
+                            <img src="/icon?id=${ext.id}" class="extension-icon" alt="扩展图标">
                             <div class="extension-info">
                                 <div class="extension-title">${ext.title}</div>
                                 <div class="extension-description">${ext.description}</div>
