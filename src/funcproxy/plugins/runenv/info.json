@@ -1,7 +1,7 @@
 {
     "author": "Example Developer",
     "description": "在执行程序之前，我觉得它应该需要知道一些事情",
-    "enabled": true,
+    "enabled": false,
     "func": [
         {
             "description": "get system version info",

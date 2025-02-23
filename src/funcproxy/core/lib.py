@@ -57,7 +57,7 @@ def process_standard_request(request: Request) -> dict:
     plugin_manager = get_plugin_manager()
     tools = []
     for tool_name, plugin_name in plugin_manager.tools.items():
-        logger.debug("tools name: %s", tools, plugin_name)
+        logger.debug("tools name: %s %s", tools, plugin_name)
         tools = plugin_manager.enabled_plugins[plugin_name].add_function(tools)
     data['model'] = proxy_config['modelName']
     if len(tools) > 0:

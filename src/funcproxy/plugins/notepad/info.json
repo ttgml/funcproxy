@@ -1,7 +1,7 @@
 {
     "author": "Example Developer",
     "description": "好记性不如烂笔头，也许AI也要用它记点东西",
-    "enabled": true,
+    "enabled": false,
     "func": [
         {
             "description": "You can record some necessary things in a notebook.",
