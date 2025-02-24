@@ -1,0 +1,19 @@
+{
+    "author": "Example Developer",
+    "description": "获取当前日期和时间",
+    "enabled": true,
+    "func": [
+        {
+            "description": "Get the current date and time",
+            "func": "do_get_current_time",
+            "name": "获取当前时间"
+        }
+    ],
+    "id": "time",
+    "size": "0.01MB",
+    "title": "time - 获取当前日期和时间",
+    "type": "func",
+    "updated": "2025-02-24",
+    "version": "0.0.2",
+    "website": "https://example.com"
+}

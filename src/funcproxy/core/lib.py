@@ -180,7 +180,7 @@ def process_stream_request(request: Request):
     plugin_manager = get_plugin_manager()
     tools = []
     for tool_name, plugin_name in plugin_manager.tools.items():
-        logger.debug("tools name: %s", tools, plugin_name)
+        logger.debug("tools name: %s %s", tools, plugin_name)
         tools = plugin_manager.enabled_plugins[plugin_name].add_function(tools)
     logger.debug("tools result: %s", tools)
     # data['model'] = proxy_config['modelName']

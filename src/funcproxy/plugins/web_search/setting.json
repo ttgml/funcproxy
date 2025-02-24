@@ -1,12 +1,21 @@
 {
     "current": {
-        "apikey": "fc-ec97007f1c2643b3b202ec4cd2a9e674"
+        "firecrawl_apikey": "fc-ec97007f1c2643b3b202ec4cd2a9e674",
+        "tavily_apikey": ""
     },
     "form": [
         {
             "default": "",
             "label": "Firecrawl API KEY",
-            "name": "apikey",
+            "name": "firecrawl_apikey",
+            "placeholder": "API KEY",
+            "required": true,
+            "type": "text"
+        },
+        {
+            "default": "",
+            "label": "Tavily API KEY",
+            "name": "tavily_apikey",
             "placeholder": "API KEY",
             "required": true,
             "type": "text"
