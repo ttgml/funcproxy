@@ -4,14 +4,38 @@
     "enabled": true,
     "func": [
         {
-            "description": "Search for information on the Internet.",
+            "description": "执行实时网络搜索，获取与查询关键词相关的最新网页、新闻或学术内容。适用于需要实时数据、事件进展、权威来源引用或复杂问题的多角度信息检索。",
             "func": "do_search_online",
             "name": "联网搜索",
             "parameters": {
                 "properties": {
-                    "keyword": {
-                        "description": "any search keyword",
-                        "type": "string"
+                    "query": {
+                        "type": "string",
+                        "description": "搜索关键词或短语，例如：'2024巴黎奥运会最新奖牌榜' 或 'AI芯片技术趋势'"
+                    },
+                    "max_results": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 20,
+                        "default": 10,
+                        "description": "返回的搜索结果数量（默认5条）"
+                    },
+                    "time_range": {
+                        "type": "string",
+                        "enum": ["hour", "day", "week", "month", "year"],
+                        "description": "限定搜索结果的发布时间范围，例如：'week' 表示最近7天"
+                    },
+                    "topic": {
+                        "type": "string",
+                        "enum": ["finance", "news", "general"],
+                        "default": "general",
+                        "description": "搜索结果的主题分类，例如：'finance' 表示金融相关"
+                    },
+                    "search_depth": {
+                        "type": "string",
+                        "enum": ["base", "advanced"],
+                        "default": "base",
+                        "description": "搜索深度，可选值：'base' 或 'advanced'，默认为'base'"
                     }
                 },
                 "required": [
@@ -21,15 +45,16 @@
             }
         },
         {
-            "description": "Get the content of a URL webpage.",
+            "description": "获取指定URL的完整网页内容，包括文本、标题、元数据及结构化信息。适用于需要分析特定页面内容、提取关键数据或验证页面信息的场景。支持处理静态HTML和动态渲染（如JavaScript生成的内容）。",
             "func": "do_open_website",
             "name": "访问URL地址",
             "parameters": {
                 "properties": {
                     "url": {
-                        "description": "url link",
-                        "type": "string"
-                    }
+                        "type": "string",
+                        "format": "uri",
+                        "description": "目标网页的完整URL，例如：'https://example.com/article/123'"
+                      }
                 },
                 "required": [
                     "url"

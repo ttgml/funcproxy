@@ -4,36 +4,28 @@
     "enabled": false,
     "func": [
         {
-            "description": "You can record some necessary things in a notebook.",
+            "description": "将文本内容持久化存储为笔记，向记事本末尾追加新内容。笔记中可能会记录任何事情。内容在后续对话中可通过读取工具访问。",
             "func": "do_write_notepad",
             "name": "写笔记",
             "parameters": {
                 "properties": {
-                    "note": {
-                        "description": "The content that needs to be recorded",
+                    "content": {
+                        "description": "要储存的文本内容（例如：'明天下午三点会议')",
                         "type": "string"
                     }
                 },
                 "required": [
-                    "item"
+                    "content"
                 ],
                 "type": "object"
             }
         },
         {
-            "description": "Read the important notes in the notebook.",
+            "description": "获取记事本中所有历史内容的完整内容，按写入时间从旧到新排序。",
             "func": "do_read_notepad",
             "name": "读笔记",
             "parameters": {
-                "properties": {
-                    "keyword": {
-                        "description": "anything",
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "item"
-                ],
+                "properties": {},
                 "type": "object"
             }
         }

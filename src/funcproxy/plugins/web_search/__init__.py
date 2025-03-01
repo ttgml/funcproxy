@@ -11,14 +11,13 @@ class Plugin(PluginBase):
     def do_search_online(self, parameters) -> str:
         parameters = json.loads(parameters)
         setting = self.get_settings()
+        self.logger.debug("parameters: %s", parameters)
         try:
             headers = {
                 "Authorization": "Bearer " + setting["tavily_apikey"],
                 "Content-Type": "application/json"
             }
-            data = {
-                "query": str(parameters["keyword"])
-            }
+            data = parameters
             self.logger.debug("tavily data: %s", data)
             response = requests.post(self.tavily_api, headers=headers, json=data)
             if response.status_code == 200:
@@ -43,7 +42,9 @@ class Plugin(PluginBase):
             if response.status_code == 200:
                 if response.json()['success'] == True:
                     return response.json()["data"]["markdown"]
+            else:
+                self.logger.error(response.json())
             return "not found"
         except Exception as e:
             self.logger.error(e)
-            return "not found"
+            return "tool is abnormal"

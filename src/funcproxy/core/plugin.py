@@ -115,6 +115,7 @@ class PluginManager:
         return result
     
     def get_plugin_settings(self, plugin_id: str) -> dict:
+        """获取插件设置"""
         result = {}
         plugin_path = os.path.join(self.plugins_path, plugin_id)
         plugin_setting_obj = os.path.join(plugin_path, "setting.json")
@@ -123,6 +124,7 @@ class PluginManager:
         return result
     
     def update_plugin_settings(self, plugin_id: str, current_info: dict):
+        """更新插件设置"""
         plugin_path = os.path.join(self.plugins_path, plugin_id)
         plugin_setting_obj = os.path.join(plugin_path, "setting.json")
         if os.path.exists(plugin_setting_obj):
@@ -133,6 +135,7 @@ class PluginManager:
         else:
             return False
     def save_plugin_info(self, plugin_id: str, info: dict) -> dict:
+        """保存插件信息"""
         plugin_path = os.path.join(self.plugins_path, plugin_id)
         plugin_info_path = os.path.join(plugin_path, "info.json")
         with open(plugin_info_path, 'w') as f:

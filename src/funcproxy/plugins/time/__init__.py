@@ -8,4 +8,4 @@ class Plugin(PluginBase):
     def do_get_current_time(self, parameters) -> str:
         self.logger.debug("do_get_current_time called")
         # 返回当前时间 ，年月日 时分秒
-        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        return time.strftime("北京时间: %Y-%m-%d %H:%M:%S", time.localtime())

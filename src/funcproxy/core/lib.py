@@ -204,6 +204,7 @@ def process_stream_request(request: Request):
                         json_str = chunk_str[len('data: '):]
                         if json_str.strip() == "[DONE]":
                             if final_tool_calls == {}:
+                                logger.debug("process end %s", "xxx")
                                 process_session = False
                             else:
                                 for i in final_tool_calls.keys():
@@ -252,6 +253,7 @@ def process_stream_request(request: Request):
             error_msg = "error: %s" + str(e)
             yield "data: " + str(generate_stream_error_response(error_msg)) + "\n\n"
             yield "[DONE]"
+            logger.debug("process end %s", e)
             process_session = False
         finally:
             response.close()

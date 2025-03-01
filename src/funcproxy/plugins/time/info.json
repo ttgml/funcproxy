@@ -1,7 +1,7 @@
 {
     "author": "Example Developer",
     "description": "获取当前日期和时间",
-    "enabled": true,
+    "enabled": false,
     "func": [
         {
             "description": "Get the current date and time",
